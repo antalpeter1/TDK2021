@@ -1,1 +1,6 @@
 real_quadcopter/crazyswarm/ros_ws/src/externalDependencies/libmotioncapture/externalDependencies/vicon-datastream-sdk/Vicon/CrossMarket/DataStream/ViconDataStreamSDK_CPPRetimerTest/ViconDataStreamSDK_CPPRetimerTest.cpp
+*.aux
+doc/.vscode/
+doc/_main*
+!doc/_main.tex
+!doc/_main.pdf

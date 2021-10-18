@@ -17,7 +17,7 @@ The quadcopter is an out-of-the-box device, the user only needs to assemble the 
 
 Using the stock battery the flight time is 7 minutes without any external payloads. The maximum recommended payload is 15 grams including the extension decks which can be mounted to the drone. We only use one extension deck, on which the OptiTrack markers are mounted (see Fig. \ref{fig:hardware}), but there are several possibilities to extend the functionality and visual effects, for example the flow deck for optical flow measurement or the LED-ring deck.
 
-The workstation PC communicates with the drone via the Crazyradio PA 2.4 GHz USB dongle. The radio communication makes it possible to update the firmware without a cable, and communicate with the quadrotor midflight, i.e. send external position data, update parameters, or log measurement data. The main parts of the hardware are displayed in Figure \ref{fig:hardware}.
+The workstation PC communicates with the drone via the Crazyradio PA 2.4 GHz USB dongle. The radio communication makes it possible to update the firmware without a cable, and communicate with the quadrotor mid-flight, i.e. send external position data, update parameters, or log measurement data. The main parts of the hardware are displayed in Figure \ref{fig:hardware}.
 
 
 \begin{figure}
@@ -72,13 +72,60 @@ Although OptiTrack is a very precise and efficient measurement device, sometimes
 \end{figure}
 
 \subsection{Backflip maneuver implementation}
-In the Crazyswarm framework (running on the workstation PC) there are built-in examples for the high-level control of the quadcopter: for example it is enough to call the \verb+takeOff()+, \verb+goTo()+, and \verb+land()+ methods from a script to take off, hover for a specified duration, go to a given point in space, and land -- these commands are sent to the on-board microcontroller through a ROS C++ layer and the Crazyradio PA. In the \verb+.launch+ file of ROS, the user can specify the initial position of the drone, the controller type, state estimator type, logging variables, and other properties. The firmware parameters can be modified midflight, for example to adjust controller gains, or switch between controller types.
+In the Crazyswarm framework (running on the workstation PC) there are built-in examples for the high-level control of the quadcopter: for example it is enough to call the \verb+takeOff()+, \verb+goTo()+, and \verb+land()+ methods from a script to take off, hover for a specified duration, go to a given point in space, and land -- these commands are sent to the on-board microcontroller through a ROS C++ layer and the Crazyradio PA. In the \verb+.launch+ file of ROS, the user can specify the initial position of the drone, the controller type, state estimator type, logging variables, and other properties. The firmware parameters can be modified mid-flight, for example to adjust controller gains, or switch between controller types.
 
-Our own implementation is a modified version of Crazyswarm, available at the GitHub repository TDK2021/real\_quadcopter/crazyswarm\footnote{\url{https://github.com/antalpeter1999/TDK2021}}. Our main contributions are in the controller of the firmware (open-loop and geometric control), and in the Python API for high-level commands, and simultaneous control of multiple drones.
+Our own implementation is a modified version of Crazyswarm, available at the GitHub repository \verb+TDK2021/real_quadcopter/crazyswarm+\footnote{\url{https://github.com/antalpeter1999/TDK2021}}. Our main contributions are in the controller of the firmware (open-loop and geometric control), and in the Python API for high-level commands, and simultaneous control of multiple drones.
 
-The evaluation of the open-loop control law, i.e. the calculation of control inputs from the current time has small computational cost, therefore it is practical to be executed on-board. In our implementation of this controller, the user only needs to set the value of \verb+isFlipControl+ variable to true, the quadcopter immediately starts the flip maneuver, and then automatically switches back to PID control. The parameters of the maneuver are sent to the drone before taking off (at the beginning of the high-level script). %The flip control policy is implemented within the innermost loop of the PID control code, therefore it runs at 500 Hz.
+The high-level script to perform a backflip maneuver is quite simple, because all control algorithms are implemented on-board. However, we need to build and flash the firmware of the quadcopter MCU after every change in the source code, therefore parameter setting and execution of high-level tasks is easier using Python scripts. The steps of the high-level script to perform the backflip are illustrated in Algorithm \ref{alg:hl}.
 
-The reference trajectory for geometric control, i.e. the coefficients of 7th degree polynomials and the corresponding time duration are saved to a csv file after the simulations. In the Python API, it is loaded and sent to the Crazyflie before taking off. When the user wants to start the backflip maneuver, similarly to the open-loop method, only needs to set the value of \verb+isFlipControl+ to true. The on-board algorithm then starts executing the previously saved trajectory, switches to pitch reference from yaw reference, and switches back after the maneuver is over. 
+\begin{algorithm}
+  \caption{High-level commands for backflipping}
+  \label{alg:hl}
+  \begin{algorithmic}[1]
+    \State Send parameters to the Crazyflie: controller type (open-loop or geometric), trajectory information, controller gains
+    \State Take off and hover at the initial point of the flip
+    \State Start the flip maneuver, and wait until it is over
+    \State Land
+  \end{algorithmic}
+  \end{algorithm}
+
+The evaluation of the open-loop control law, i.e. the calculation of control inputs from the current time has small computational cost, therefore it is practical to be implemented on-board. The implementation is detailed in Algorithm \ref{alg:open}, the maneuver is triggered from the ground station with a radio command, it is executed automatically, and the quadcopter ends in hovering mode afterwards.
+%In our implementation of this controller, the user only needs to set the value of \verb+isFlipControl+ variable to true, the quadcopter immediately starts the flip maneuver, and then automatically switches back to PID control. The parameters of the maneuver are sent to the drone before taking off (at the beginning of the high-level script). %The flip control policy is implemented within the innermost loop of the PID control code, therefore it runs at 500 Hz.
+\begin{algorithm}
+  \caption{Open-loop control on-board implementation}
+  \label{alg:open}
+  \begin{algorithmic}[1]
+    \State Hover with PID control, wait for ground station command to start the backflip
+    \State Lift with PID control to gain momentum
+      \While {the flip is not over}
+      \State Decide in which section we are (out of the 5 in Fig. \ref{fig:sections})
+      \State Apply the control input of the current section based on \eqref{eq:openinp}
+    \EndWhile
+    \State Stabilize the quadcopter with PID control
+    \State Get back to initial position
+  \end{algorithmic}
+  \end{algorithm}
+
+The second control approach, i.e. reference trajectory tracking with geometric control is also implemented on-board. The coefficients of the designed trajectory represented by 7th degree polynomials, and the corresponding time duration are saved to a csv file after the simulations. In the Python API, it is loaded and sent to the Crazyflie with the tuned controller gains, before taking off. The on-board implementation of the control approach is detailed in Algorithm~\ref{alg:geom}. Similarly to the open-loop approach, the command to start the maneuver comes from the ground station, and then the backflip is performed automatically.
+\begin{algorithm}
+  \caption{Geometric tracking control on-board implementation}
+  \label{alg:geom}
+  \begin{algorithmic}[1]
+    \State Hover with geometric control, wait for ground station command to start the backflip
+    \State Lift with geometric control to gain momentum
+      \While {the flip is not over}
+      \State Get the current state from the state estimator module
+      \State Get the setpoint by evaluating the reference trajectory
+      \State Calculate the control inputs from the control law \eqref{eq:geomlaw}
+      \State Apply the control inputs to the motors
+    \EndWhile
+    \State Stabilize the quadcopter with geometric control
+    \State Get back to initial position
+  \end{algorithmic}
+  \end{algorithm}
+
+
+ %When the user wants to start the backflip maneuver, similarly to the open-loop method, only needs to set the value of \verb+isFlipControl+ to true. The on-board algorithm then starts executing the previously saved trajectory, switches to pitch reference from yaw reference, and switches back after the maneuver is over. 
 
 %A big advantage of the on-board control is that the maneuver can be performed by multiple quadcopters simultaneously without any problems coming from communication delays and lost packages between the ground control PC and the drone microcontroller.
 

@@ -17,7 +17,8 @@ The nonlinear geometric tracking control used in this work is based on the ones 
 \end{subequations}
 where $r\in\mathbb{R}^3$ is the position of the drone in the inertial frame, $\omega\in\mathbb{R}^3$ is the angular velocity, $R\in SO(3)$ is the rotation matrix between the vehicle and body frames, $F\in\mathbb{R}$ is the collective thrust, and $e_3=[ 0, 0, 1 ]^\top$. The hat operator $\hat{\cdot}:\mathbb{R}^3\rightarrow SO(3)$ is defined by the condition that $\hat{x}y = x\times y$ for all $x,y\in \mathbb{R}^3$. Parameters are the mass of the drone $m$, the gravity $g$, and the inertia $J$.
 
-Following the attitude control method proposed in \cite{lelemc2010}, the force and torque inputs $F$ and $\tau$ are defined as
+\newpage
+Following the attitude control method proposed in \cite{lelemc2010}, the \textit{control law} for the force and torque inputs is defined as
 \begin{subequations}\label{eq:geomlaw}
 \begin{align}
     F&= (-K_r e_r - K_v e_v + m g e_3+m \ddot r_d) R e_3,\\
@@ -35,7 +36,7 @@ with gain matrices $K_r, K_v, K_R, K_\omega \in \mathbb{R}^{3\times 3}$, and err
 \end{subequations}
 where $r_d$, $R_d$ and $\omega_d$ are the position, orientation and angular velocity reference, $\mathrm{tr}(\cdot)$ is the trace operator, and the vee operator $(\cdot)^\vee$ is the inverse of the hat operator such that $(\cdot)^\vee:SO(3)\rightarrow \mathbb{R}^3$. Similarly to \cite{mellinger2011} we use diagonal matrix gains instead of scalars, because it works much better on the real system this way. With control gains selected carefully, the proposed attitude control approach is proved to be stable in the full space of rotation matrices (excluding the exact inversion), as derived in \cite{lelemc2010}.
 
-The geometric controller demonstrated in this work has two operating modes: tracking of reference trajectories described by time functions of the flat outputs $x_d=[r_d^\top, \psi_d]^\top$ defined in Section \ref{sec:flat}, and tracking the reference flip trajectory described by time functions of the position and pitch angle. In case of trajectory planning for the flat outputs, the reference is designed such that $R_d=[r_1, r_2, r_3]$ and \cite{turpinkumar2011}
+The geometric controller demonstrated in this work has two operating modes: tracking of reference trajectories described by time functions of the flat outputs $x_d=[r_d^\top, \psi_d]^\top$, and tracking the reference flip trajectory described by time functions of the position and pitch angle. We use the former for takeoff, land and hovering, and the latter during the backflip maneuver. In case of trajectory planning for the flat outputs, the reference is designed such that $R_d=[r_1, r_2, r_3]$ and \cite{turpinkumar2011}
 \begin{subequations}\label{eq:attref}
 \begin{align}
     r_1 &= r_2\times r_3,\\

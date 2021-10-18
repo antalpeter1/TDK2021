@@ -10,7 +10,7 @@ In this section, a two dimensional dynamic model of the quadcopter is used as th
 \begin{align}
 m\ddot{x}&=-(T_1 + T_2 + T_3 + T_4)\sin\theta,\\
 m\ddot{z}&=-(T_1 + T_2 +T_3 + T_4) \cos\theta+mg,\\
-J_{yy}\ddot{\theta} &= l(T_1+T_4-T_2-T_3),
+J_{yy}\ddot{\theta} &= l(T_1+T_4-T_2-T_3),\label{eq:opinp1}
 \end{align}
 
 \begin{figure}[b]
@@ -21,7 +21,7 @@ J_{yy}\ddot{\theta} &= l(T_1+T_4-T_2-T_3),
 
 where $\theta$ is the pitch angle, $g$ is the gravitational acceleration, $m$ is the mass of the drone, $l$ is the distance of a propeller from the center of mass of the vehicle, $J_{yy}$ is the moment of inertia about the axis of the flip (out-of-plane principal axis), and $T_i,$ $i=1,2,3,4$ are the thrusts of each rotor. The collective acceleration $U$ is the sum of all rotor thrusts divided by the mass of the drone,
 \begin{equation}
-U = \frac{T_1 + T_2 + T_3 + T_4}{m}.
+U = \frac{T_1 + T_2 + T_3 + T_4}{m}.\label{eq:opinp2}
 \end{equation}
 As the small DC motors of the Crazyflie 2.1 have very small time constants the actuator dynamics are omitted.% The physical parameters of the model are contained in Table x, mostly determined from \cite{Forster}.
 
@@ -36,7 +36,7 @@ z_0 = z_f &= 0,\\
 \theta_f = \theta_0 + 2\pi &= 0.
 \end{align}
 \end{subequations}
-We use a simple control approach without explicit optimization for execution time. Research has shown that for different types of dynamic systems, bang-bang control strategies provide near-optimal results, with small complexity \cite{KALMARNAGY2004,tdk2019}. We use such control actions within a restricted control envelope, denoted as a range of accelerations $[\underline{\beta},\overline{\beta}]$, in order to take into consideration modeling uncertainties and reserve some resources for the on-board stabilizing controller. This restriction can be mathematically formulated for the rotating rotor thrusts as
+We use a simple control approach without explicit optimization for execution time. Research has shown that for different types of dynamic systems, bang-bang control strategies provide near-optimal results, with small complexity \cite{KALMARNAGY2004,tdk2019}. We use such control actions within a restricted control envelope, denoted as a range of accelerations $[\underline{\beta},\overline{\beta}]$, in order to take into consideration modelling uncertainties and reserve some resources for the on-board stabilizing controller. This restriction can be mathematically formulated for the rotating rotor thrusts as
 \begin{align}
 T_\mathrm{min} \leq \frac{m\underline{\beta}}{4}\leq F_{i} \leq\frac{m\overline{\beta}}{4} \leq T_\mathrm{max}.
 \end{align}
@@ -63,6 +63,16 @@ P=\begin{bmatrix}
 U_1 & t_1 & t_3 & U_5& t_5
 \end{bmatrix} ^\top
 \end{align} as the parameters to optimize, and calculate the other ten quantities as detailed in the paper. The calculation of an initial guess is also discussed in \cite{LSICRA2010}, which we utilize in the implementation.
+
+From the parameters, the control input vector can be calculated as
+ \begin{align}\label{eq:openinp}
+    \begin{bmatrix}
+        F_i \\ \tau_i
+    \end{bmatrix}=\begin{bmatrix}
+        mU_i \\ 0 \\ J_{yy}\ddot{\theta}_i \\ 0
+    \end{bmatrix},
+\end{align}   
+where $m$ is the mass of the quadcopter.
 
 \subsection{Parameter optimization via numerical simulations}
 The five parameters are tuned in order to minimize the norm of the final state error $E$, mathematically described as
