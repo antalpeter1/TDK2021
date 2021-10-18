@@ -1,0 +1,83 @@
+% BSc and MSc thesis LaTeX template English version
+% Budapest University of Technology and Economics
+% Faculty of Mechanical Engineering
+% Provided by: Antal Péter, Applied Mechanics Student Assiciation
+
+\ProvidesPackage{style}
+
+\usepackage{pdfpages}
+
+\usepackage[a4paper,left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}	
+\raggedbottom
+%\usepackage[a4paper]{geometry}
+%\setlength{\oddsidemargin}{15.5pt} 
+%\setlength{\evensidemargin}{15.5pt}
+
+
+\usepackage[utf8]{inputenc}	
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[magyar,british]{babel}	
+\usepackage[toc,page]{appendix}		
+
+\font\cimsor=cmr12 at 14pt		
+\renewcommand{\baselinestretch}{1.15}
+\setlength{\parskip}{6pt}			
+\setlength{\parindent}{0cm}
+\usepackage{lastpage}
+
+\usepackage{graphicx}				
+\usepackage{pdfpages}					
+
+\usepackage{tabularx}				
+\usepackage{amsmath}					
+\usepackage{amssymb}					
+\usepackage[labelfont=bf]{caption}	
+\usepackage{subcaption}
+\usepackage{titling}
+\usepackage{physics}
+\usepackage{url}					
+\def\UrlBreaks{\do\/\do-}
+\usepackage{gensymb} 					
+\usepackage{mwe} 					
+\usepackage{bold-extra}
+\usepackage{empheq}						
+\usepackage{enumerate}			
+
+\numberwithin{equation}{section} 
+\numberwithin{figure}{section} 		
+\numberwithin{table}{section} 	
+
+%------------- Egyéni parancsok
+
+\newcommand{\matr}[1]{\mathbf{#1}}	
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\szeddmajdki}{\colorbox{yellow}}
+\newcommand{\inlinemat}[1]{
+												
+	\ensuremath{\begin{bmatrix}#1\end{bmatrix}}} 
+\newcommand{\source}[1]{\caption*{Forrás: {#1}} }
+\newcommand{\goodchi}{\protect\raisebox{2pt}{$\chi$}} 	
+														
+\newcommand{\hiv}{\textbf{(HIVATKOZÁS)}}				
+\newcommand{\feladat}[1]{\small \normalfont {#1}} 	
+\renewcommand{\dim}[1]{\;\mathrm{#1}} 		
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}}		
+\newcommand*\widefbox[1]{\fbox{\hspace{2em}#1\hspace{2em}}} 
+\usepackage{hyperref}				
+\hypersetup{							% kékek a hivatkozások
+	colorlinks = false
+	%linkbordercolor = {red},
+	% allcolors = {black}
+}
+\usepackage[numbered,framed]{matlab-prettifier}		
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+%\usepackage{natbib}
+\bibliographystyle{IEEEtran}

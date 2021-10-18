@@ -1,0 +1,50 @@
+\documentclass[12pt]{article}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+
+\usepackage{style}
+\usepackage{blindtext}
+\usepackage{etoolbox}
+\usepackage{perpage}
+\MakePerPage{footnote}
+
+\addto\captionsbritish{
+  \renewcommand{\contentsname}
+    {Table of Contents}
+}
+
+\newcolumntype{b}{X}
+\newcolumntype{s}{>{\hsize=.5\hsize}X}
+\newcommand{\forceindent}{\leavevmode{\parindent=2em\indent}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\begin{document}
+\pagenumbering{Roman} % Roman numbering
+\input{titlepage.tex}
+\renewcommand{\baselinestretch}{0.85}\normalsize % kicsinyít
+\pagebreak
+\tableofcontents
+\renewcommand{\baselinestretch}{1.15}\normalsize % vissza az eredetire
+\pagebreak
+%\include{abstract-eng}
+%\include{abstract-hun}
+
+\pagenumbering{arabic}
+
+\include{sec1-intro}
+\include{sec2-model}
+\include{sec3-flip1}
+\include{sec4-flip2}
+\include{sec5-simu}
+\include{sec6-meas}
+\include{sec7-summary}
+\newpage
+\listoffigures
+\pagebreak
+\renewcommand{\baselinestretch}{0.85}\normalsize % kicsinyít
+\bibliography{reference.bib}
+\addcontentsline{toc}{section}{References}
+\end{document}
