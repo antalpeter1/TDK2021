@@ -1,0 +1,4 @@
+numpy
+pyyaml
+sphinx-argparse
+sphinx-tabs

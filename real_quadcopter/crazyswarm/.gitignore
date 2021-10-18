@@ -1,0 +1,24 @@
+ros_ws/build/
+ros_ws/devel/
+ros_ws/src/CMakeLists.txt
+ros_ws/src/crazyflie-firmware/**
+.DS_Store
+*.pyc
+*.o
+*.o.d
+*.a
+*~
+*.mexa64
+# james's symlinks :)
+cfs.yaml
+firm
+client
+launch # ignore launch symlink
+!*ros_ws/*launch* # don't ignore folders with launch in the name
+.vscode/
+home/crazyfly/crazyswarm/ros_ws/src/crazyswarm/scripts/video
+home/crazyfly/crazyswarm/ros_ws/src/crazyswarm/scripts/figures
+ros_ws/src/crazyswarm/scripts/video/
+ros_ws/src/crazyswarm/scripts/figures/
+video/
+figures/
