@@ -71,7 +71,7 @@ Although OptiTrack is a very precise and efficient measurement device, sometimes
 \caption{Experimental setup for the presented measurement results: 2 OptiTrack Prime 13 infrared cameras and a Crazyflie 2.1 quadcopter with reflective markers.}
 \end{figure}
 
-\subsection{Backflip maneuver implementation}
+\subsection{Backflip maneuver implementation}\label{sec:implementation}
 In the Crazyswarm framework (running on the workstation PC) there are built-in examples for the high-level control of the quadcopter: for example it is enough to call the \verb+takeOff()+, \verb+goTo()+, and \verb+land()+ methods from a script to take off, hover for a specified duration, go to a given point in space, and land -- these commands are sent to the on-board microcontroller through a ROS C++ layer and the Crazyradio PA. In the \verb+.launch+ file of ROS, the user can specify the initial position of the drone, the controller type, state estimator type, logging variables, and other properties. The firmware parameters can be modified mid-flight, for example to adjust controller gains, or switch between controller types.
 
 Our own implementation is a modified version of Crazyswarm, available at the GitHub repository \verb+TDK2021/real_quadcopter/crazyswarm+\footnote{\url{https://github.com/antalpeter1999/TDK2021}}. Our main contributions are in the controller of the firmware (open-loop and geometric control), and in the Python API for high-level commands, and simultaneous control of multiple drones.
@@ -79,7 +79,7 @@ Our own implementation is a modified version of Crazyswarm, available at the Git
 The high-level script to perform a backflip maneuver is quite simple, because all control algorithms are implemented on-board. However, we need to build and flash the firmware of the quadcopter MCU after every change in the source code, therefore parameter setting and execution of high-level tasks is easier using Python scripts. The steps of the high-level script to perform the backflip are illustrated in Algorithm \ref{alg:hl}.
 
 \begin{algorithm}
-  \caption{High-level commands for backflipping}
+  \caption{High-level script executed on the ground control PC}
   \label{alg:hl}
   \begin{algorithmic}[1]
     \State Send parameters to the Crazyflie: controller type (open-loop or geometric), trajectory information, controller gains
@@ -89,7 +89,7 @@ The high-level script to perform a backflip maneuver is quite simple, because al
   \end{algorithmic}
   \end{algorithm}
 
-The evaluation of the open-loop control law, i.e. the calculation of control inputs from the current time has small computational cost, therefore it is practical to be implemented on-board. The implementation is detailed in Algorithm \ref{alg:open}, the maneuver is triggered from the ground station with a radio command, it is executed automatically, and the quadcopter ends in hovering mode afterwards.
+The evaluation of the open-loop control law, i.e. the calculation of control inputs from the current time has small computational cost, therefore it is practical to be implemented on-board. The implementation is detailed in Algorithm \ref{alg:open}, the maneuver is triggered from the ground station with a high-level command, it is executed automatically, and the quadcopter ends in hovering mode afterwards.
 %In our implementation of this controller, the user only needs to set the value of \verb+isFlipControl+ variable to true, the quadcopter immediately starts the flip maneuver, and then automatically switches back to PID control. The parameters of the maneuver are sent to the drone before taking off (at the beginning of the high-level script). %The flip control policy is implemented within the innermost loop of the PID control code, therefore it runs at 500 Hz.
 \begin{algorithm}
   \caption{Open-loop control on-board implementation}
@@ -159,23 +159,30 @@ However, the error of the position tracking is significantly higher during the m
 \caption{Backflipping measurement results with geometric control.}\label{fig:geommeas}
 \end{figure}
 
-\setlength{\fboxsep}{0pt}%
-\setlength{\fboxrule}{1pt}%
-
 \begin{figure}
+\setlength{\fboxsep}{0pt}%
+\setlength{\fboxrule}{1pt}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.45\textwidth}
   \centering
-  \fbox{\includegraphics[height=10cm]{Fig/opencomp.png}}
-  \caption{Optimization-based open-loop control}
+  \fbox{\includegraphics[height=6cm]{Fig/opencomp.png}}
+  \caption{Optimization-based open-loop control, the trajectory is displayed in Fig. \ref{fig:openmeas}}
   \label{fig:sub1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\hspace{1cm}
+\begin{subfigure}{.45\textwidth}
   \centering
-  \fbox{\includegraphics[height=10cm]{Fig/geomcomp.png}}
-  \caption{Geometric reference tracking control}
+  \fbox{\includegraphics[height=6cm]{Fig/geomcomp.png}}
+  \caption{Geometric reference tracking control, the trajectory is displayed in Fig. \ref{fig:geommeas}}
   \label{fig:sub2}
 \end{subfigure}
 \caption{Composite images of the measurement results with both proposed control methods. A video of the measurements is available at \textit{\textbf{TODO}}}
 \label{fig:test}
 \end{figure}
+
+\subsection{Robustness and scalability for multiple drones}
+The presented measurement results are satisfactory for both control methods, the quadcopter performed a backflip maneuver successfully. However, the open-loop approach is very sensitive to parameter uncertainties, therefore it needs specific tuning for each Crazyflie, and the quality of the maneuver often varies even with the tuned parameters. Due to the inconsistency of the performance, we could not apply the open-loop control for simultaneous flip with multiple drones.
+
+However, geometric tracking control overcomes the problematics caused by parameter uncertainties using feedback, providing a highly robust and consistent performance for the backflip maneuver. Utilizing the robustness of the control approach, the maneuver has been implemented for simultaneous backflipping with three drones. A video of the acrobatic maneuver is available at \textbf{\textit{TODO}}. The implementation of the simultaneous flip differs from the single maneuver discussed in Section \ref{sec:implementation} only in the high-level script. The trajectory of each drone during the maneuver is evaluated relatively to their initial position and orientation, making it easy to extend the single flip implementation. % In the high-level script we send each drone to their initial pose, and send the command to start the flip. Afterwards, the quadcopters hover at the initial pose and wait for the next command, for example to land.
+
+The scalability of the proposed control algorithms for other types of quadcopters (e.g. medium or large-sized) is out of the scope of this work, however, the possibilities are briefly discussed in the followings. The open-loop method is applied in \cite{LSICRA2010} to a medium-sized drone successfully, therefore we are convinced that our modified version could also be applied to other types. Geometric control is even more general than the open-loop approach, it is applied not only for different types of quadcopters \cite{turpinkumar2011}, but also for other autonomous systems, such as robotic manipulators \cite{bullo2004}.
