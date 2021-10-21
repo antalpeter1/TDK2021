@@ -6,8 +6,10 @@ Another important aspect is that using feedback control instead of an open-loop 
 
 Geometric control of a rigid body is similar to quaternion based control in the sense that it is nonlinear and covers the whole operating domain of the quadcopter state space. However, literature has shown that geometric control approaches have better performance and stability guarantees when following complex trajectories or performing aggressive maneuvers \cite{lelemc2010, turpinkumar2011, mellinger2011}. In this section, the trajectory planning with quaternion attitude representation and the geometric tracking control of the designed trajectory are presented.
 
-\subsection{Geometric tracking control}
-The nonlinear geometric tracking control used in this work is based on the ones presented in \cite{lelemc2010} and \cite{turpinkumar2011}, designed to track a 3D trajectory on $SE(3)$. To synthesize the control law \eqref{eq:newtoneq}, \eqref{eq:rot1} and \eqref{eq:rot2} are used to describe the dynamics of the quadcopter on $SE(3)$, gathered here for clarity:
+\subsection{Geometric control for trajectory tracking of aggressive maneuvers}
+The nonlinear geometric tracking control used in this work is based on the ones presented in \cite{lelemc2010} and \cite{turpinkumar2011}, designed to track a 3D trajectory on $SE(3)$. The control method is able to track reference position on $\mathbb{R}^3$, and reference attitude on $SO(3)$, i.e. represented by rotation matrices. In quadcopter control, it is common to utilize the \textit{differential flatness} property of quadcopter dynamics, and design the trajectory for the flat outputs: the position and yaw angle. Due to the coupling of the rotational and translation dynamics in the mathematical model, the reference attitude trajectory needs to be designed such that the geometric control is able to follow the position and yaw reference. In this section, we present the control law and differential flatness based trajectory design of geometric control for aggressive maneuvers.
+
+To synthesize the control law, \eqref{eq:newtoneq}, \eqref{eq:rot1} and \eqref{eq:rot2} are used, describing the dynamics of the quadcopter on $SE(3)$, gathered here for clarity:
 \begin{subequations}
 \begin{align}
     m\ddot{r}& = (-FR + mg)e_3,\label{eq:geom_tran}\\
@@ -17,7 +19,6 @@ The nonlinear geometric tracking control used in this work is based on the ones 
 \end{subequations}
 where $r\in\mathbb{R}^3$ is the position of the drone in the inertial frame, $\omega\in\mathbb{R}^3$ is the angular velocity, $R\in SO(3)$ is the rotation matrix between the vehicle and body frames, $F\in\mathbb{R}$ is the collective thrust, and $e_3=[ 0, 0, 1 ]^\top$. The hat operator $\hat{\cdot}:\mathbb{R}^3\rightarrow SO(3)$ is defined by the condition that $\hat{x}y = x\times y$ for all $x,y\in \mathbb{R}^3$. Parameters are the mass of the drone $m$, the gravity $g$, and the inertia $J$.
 
-\newpage
 Following the attitude control method proposed in \cite{lelemc2010}, the \textit{control law} for the force and torque inputs is defined as
 \begin{subequations}\label{eq:geomlaw}
 \begin{align}
@@ -36,7 +37,8 @@ with gain matrices $K_r, K_v, K_R, K_\omega \in \mathbb{R}^{3\times 3}$, and err
 \end{subequations}
 where $r_d$, $R_d$ and $\omega_d$ are the position, orientation and angular velocity reference, $\mathrm{tr}(\cdot)$ is the trace operator, and the vee operator $(\cdot)^\vee$ is the inverse of the hat operator such that $(\cdot)^\vee:SO(3)\rightarrow \mathbb{R}^3$. Similarly to \cite{mellinger2011} we use diagonal matrix gains instead of scalars, because it works much better on the real system this way. With control gains selected carefully, the proposed attitude control approach is proved to be stable in the full space of rotation matrices (excluding the exact inversion), as derived in \cite{lelemc2010}.
 
-The geometric controller demonstrated in this work has two operating modes: tracking of reference trajectories described by time functions of the flat outputs $x_d=[r_d^\top, \psi_d]^\top$, and tracking the reference flip trajectory described by time functions of the position and pitch angle. We use the former for takeoff, land and hovering, and the latter during the backflip maneuver. In case of trajectory planning for the flat outputs, the reference is designed such that $R_d=[r_1, r_2, r_3]$ and \cite{turpinkumar2011}
+The geometric controller proposed in \cite{turpinkumar2011} is designed for tracking reference trajectories described by time functions of the flat outputs $x_d=[r_d^\top, \psi_d]^\top$. The attitude reference $R_d=[r_1, r_2, r_3]$ is constructed from the above conditions as follows:
+%, and tracking the reference flip trajectory described by time functions of the position and pitch angle. We use the former for takeoff, land and hovering, and the latter during the backflip maneuver. In case of trajectory planning for the flat outputs, the reference is designed such that $R_d=[r_1, r_2, r_3]$ and \cite{turpinkumar2011}
 \begin{subequations}\label{eq:attref}
 \begin{align}
     r_1 &= r_2\times r_3,\\
@@ -46,13 +48,14 @@ The geometric controller demonstrated in this work has two operating modes: trac
 \end{subequations}
 Using the orientation reference in \eqref{eq:attref}, the third coloumn vector $r_3$ always points in the direction of the desired collective thrust, $r_2$ is always perpendicular to both $r_3$ and the desired heading direction given by $[\cos\psi_d, \sin\psi_d, 0]$, and $r_1$ is the desired heading direction, as it is perpendicular to both $r_2$ and $r_3$. Furthermore, the three coloumn vectors are of unit length at all time instants, ensuring the orthogonality of $R_d$ altogether.
 
+
 However, during the flip maneuver we intend to specify $R_d$ from the pitch reference, therefore we do not use \eqref{eq:attref}, but design the trajectory such that the reference attitude is consistent with the reference position, as they are coupled in the dynamical model.  
 
 
 \subsection{Trajectory planning for the flip maneuver}
+In the previous section, we presented a method to calculate the desired rotation matrix in \eqref{eq:attref}, and a control law in \eqref{eq:geomlaw} to follow a specified trajectory on $SE(3)$. In this section, we propose a reference trajectory design method for the backflip maneuver. Instead of trajectory planning for the flat outputs and constructing the desired rotation matrix from \eqref{eq:attref}, we define the reference orientation matrix directly to perform the desired maneuver, and optimize the position reference afterwards. The resulting trajectory is tracked using the geometric tracking control defined in \eqref{eq:geomlaw}.
 
 Similarly to the open-loop control approach, the objective for trajectory planning is that the quadcopter should arrive as close to the starting point as possible, while keeping the control inputs within the allowed range during the maneuver. The attitude reference is specified in unit quaternions, because it is not possible to design a continuous trajectory for the flip in Euler angles, and rotation matrices are less illustrative. The conversion between Euler angles and unit quaternions is characterized by \cite{quaternion}
-
 \begin{equation}\label{eq:eul2quat}
 \begin{split}
     q =&\begin{bmatrix} q_0\\q_1\\q_2\\q_3 \end{bmatrix}={\begin{bmatrix}\cos(\psi /2)\\0\\0\\\sin(\psi /2)\\\end{bmatrix}}{\begin{bmatrix}\cos(\theta /2)\\0\\\sin(\theta /2)\\0\\\end{bmatrix}}{\begin{bmatrix}\cos(\phi /2)\\\sin(\phi /2)\\0\\0\\\end{bmatrix}}=\\=&{\begin{bmatrix}\cos(\phi /2)\cos(\theta /2)\cos(\psi /2)+\sin(\phi /2)\sin(\theta /2)\sin(\psi /2)\\\sin(\phi /2)\cos(\theta /2)\cos(\psi /2)-\cos(\phi /2)\sin(\theta /2)\sin(\psi /2)\\\cos(\phi /2)\sin(\theta /2)\cos(\psi /2)+\sin(\phi /2)\cos(\theta /2)\sin(\psi /2)\\\cos(\phi /2)\cos(\theta /2)\sin(\psi /2)-\sin(\phi /2)\sin(\theta /2)\cos(\psi /2)\\\end{bmatrix}}.
@@ -99,9 +102,7 @@ The discrete state space model can be calculated as \cite{linearsys}
     & \mathbf x_{k+1} = \mathbf A_d \mathbf x_k + \mathbf B_d u_k,\\
     & \begin{bmatrix} {\mathbf A_{d}} & {\mathbf B_{d}} \\ {\mathbf 0} & {\mathbf I} \end{bmatrix}= \mathrm{exp}\left({{\begin{bmatrix} \mathbf{A} & {\mathbf B} \\ \mathbf{0} & \mathbf{0} \end{bmatrix}}T_s}\right),
 \end{align}
-where $\mathbf A_d, \mathbf B_d$ are the discrete state space matrices, $\mathbf 0$ and $\mathbf I$ denote the zero and identity matrices with suitable size, $T_s$ is the sampling time and the exp$(\cdot)$ operator is the matrix exponent. The input of the model is the collective thrust of the propellers, $u_k=F_k$.
-
-For a fixed duration of the maneuver with $N$ discrete time steps, the optimization problem is formulated as
+where $\mathbf A_d, \mathbf B_d$ are the discrete state space matrices, $\mathbf 0$ and $\mathbf I$ denote the zero and identity matrices with suitable size, $T_s$ is the sampling time and the exp$(\cdot)$ operator is the matrix exponent. The input of the model is the collective thrust of the propellers, $u_k=F_k$. For a fixed duration of the maneuver with $N$ discrete time steps, the optimization problem is formulated as
 \begin{subequations}\label{eq:quadprog}
     \begin{align}
         &\min_u \sum_{k=1}^N \left[ \left(\mathbf x_k-\mathbf x_{d,k}\right)^\top \mathbf Q_k  \left(\mathbf x_k-\mathbf x_{d,k}\right) + u_k^\top R_k u_k\right], \text{ s.t.}\\

@@ -59,7 +59,7 @@ The control strategy of the maneuver consists of five sections, all of which has
 
 Each section has three parameters, the collective acceleration $U_i$, duration $t_i$, and angular acceleration $\ddot{\theta}_i$. Since we use the properties of bang-bang control, $U_i$ and $\ddot{\theta}_i$ fully determine each other. Based on \cite{LSICRA2010}, we select 
 \begin{align}
-P=\begin{bmatrix}
+P=\begin{bmatrix}\label{eq:openparams}
 U_1 & t_1 & t_3 & U_5& t_5
 \end{bmatrix} ^\top
 \end{align} as the parameters to optimize, and calculate the other ten quantities as detailed in the paper. The calculation of an initial guess is also discussed in \cite{LSICRA2010}, which we utilize in the implementation.
