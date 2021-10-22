@@ -7,7 +7,7 @@ Another important aspect is that using feedback control instead of an open-loop 
 Geometric control of a rigid body is similar to quaternion based control in the sense that it is nonlinear and covers the whole operating domain of the quadcopter state space. However, literature has shown that geometric control approaches have better performance and stability guarantees when following complex trajectories or performing aggressive maneuvers \cite{lelemc2010, turpinkumar2011, mellinger2011}. In this section, the trajectory planning with quaternion attitude representation and the geometric tracking control of the designed trajectory are presented.
 
 \subsection{Geometric control for trajectory tracking of aggressive maneuvers}
-The nonlinear geometric tracking control used in this work is based on the ones presented in \cite{lelemc2010} and \cite{turpinkumar2011}, designed to track a 3D trajectory on $SE(3)$. The control method is able to track reference position on $\mathbb{R}^3$, and reference attitude on $SO(3)$, i.e. represented by rotation matrices. In quadcopter control, it is common to utilize the \textit{differential flatness} property of quadcopter dynamics, and design the trajectory for the flat outputs: the position and yaw angle. Due to the coupling of the rotational and translation dynamics in the mathematical model, the reference attitude trajectory needs to be designed such that the geometric control is able to follow the position and yaw reference. In this section, we present the control law and differential flatness based trajectory design of geometric control for aggressive maneuvers.
+The nonlinear geometric tracking control used in this work is based on the ones presented in \cite{lelemc2010} and \cite{turpinkumar2011}, designed to track a 3D trajectory on $SE(3)$. The control method is able to track reference position on $\mathbb{R}^3$, and reference attitude on $SO(3)$, i.e. represented by rotation matrices. In quadcopter control, it is common to utilize the \textit{differential flatness} property of quadcopter dynamics \cite{flatness}, and design the trajectory for the flat outputs: the position and yaw angle. Due to the coupling of the rotational and translation dynamics in the mathematical model, the reference attitude trajectory needs to be designed such that the geometric control is able to follow the position and yaw reference. In this section, we present the control law and differential flatness based trajectory design of geometric control for aggressive maneuvers.
 
 To synthesize the control law, \eqref{eq:newtoneq}, \eqref{eq:rot1} and \eqref{eq:rot2} are used, describing the dynamics of the quadcopter on $SE(3)$, gathered here for clarity:
 \begin{subequations}
@@ -80,14 +80,14 @@ A 360 degree turn around the pitch axis means that the scalar part of the attitu
 \end{equation}
 to describe the scalar part of the reference attitude, where the parameters are the speed of the maneuver $\alpha$ and half of the duration of the flip $\beta$. The attitude quaternion reference trajectory is displayed in Figure \ref{fig:attref}.
 
-The position reference need to be design considering that the rotational and translational equations of the dynamical model are coupled. The motion of the flip maneuver is within the $x-z$ plane, therefore $y_d(t) = 0$. The other two equations of \eqref{eq:geom_tran} are
+The position reference is designed considering that the rotational and translational equations of the dynamical model are coupled. The motion of the flip maneuver is within the $x-z$ plane, therefore $y_d(t) = 0$. The other two equations of \eqref{eq:geom_tran} are
 \begin{subequations}\label{eq:any}
     \begin{align}
        m \ddot x & = - Fr_{13}',\\
         m \ddot{z} & = - F r_{33}' + mg,  
     \end{align}
 \end{subequations}
-where $r_{ij}'$ is the element of the rotation matrix $R$ in the $i$th row and $j$th coloumn. However, assuming that the attitude tracking converges fast enough to the reference, we can substitute the reference rotation matrix in \eqref{eq:any}, resulting in the translational state space representation
+where $r_{ij}'$ denotes the $(i, j)$-th entry of the rotation matrix $R$. However, assuming that the attitude tracking converges fast enough to the reference, we can substitute the reference rotation matrix in \eqref{eq:any}, resulting in the translational state space representation
 %\begin{subequations}
     \begin{align}\label{eq:linsys}
     \frac{\mathrm{d}}{\mathrm{d}t} \underbrace{\begin{bmatrix} x \\ \dot x \\ \tilde z \\ \dot{\tilde{z}}\end{bmatrix}}_{\mathbf{x}} = \underbrace{\begin{bmatrix} 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 \\ 0 & 0 & 0 & 0 \end{bmatrix}}_{\mathbf{A}} \begin{bmatrix} x \\ \dot x \\ \tilde z \\ \dot{\tilde{z}} \end{bmatrix} + \underbrace{\begin{bmatrix} 0 \\ r_{13}/m \\ 0 \\ r_{33}/m \end{bmatrix}}_{\mathbf{B}}  F

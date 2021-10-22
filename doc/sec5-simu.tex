@@ -45,12 +45,12 @@ where the unit of the collective accelerations $U_i^*$ is m/s$^2$, and the time 
 \begin{equation}
     F = m U,
 \end{equation}
-where $m$ is the mass of the quadcopter. Using the optimal parameter set, simulation results are displayed in Figure \ref{fig:opensimu}. On the left plot, the position of the quadcopter during the flip is shown, with snapshots from the simulation. The end of the open-loop flip is around the coordinate $(x, z)=(-0.4, 0)$~m with near-zero pitch angle, thus the final state error is only significant in the $x$ position. From that point, a PID controller stabilizes the drone and controls to the origin. On the right, the trajectory of the pitch angle in Euler representation, the angular velocity, and the collective thrust as a control input are shown with the five sections defined in Section~\ref{sec:flip}. The backflip starts at $t=0.1$ s, and ends at $t=0.95$ s, the duration is 0.85 s.
+where $m$ is the mass of the quadcopter. Simulation results are displayed in Figure \ref{fig:opensimu}, using the optimal parameter vector and a set of near-optimal parameters, as well. On the left plot, the position of the quadcopter during the flip is shown, with snapshots from the simulation. The end of the optimal maneuver is around the coordinate $(x, z)=(-0.4, 0)$~m with near-zero pitch angle, thus the final state error is only significant in the $x$ position. From that point, a PID controller stabilizes the drone and controls to the origin. On the right, the trajectory of the pitch angle in Euler representation, the angular velocity, and the collective thrust as a control input are shown, where the five sections defined in Section~\ref{sec:flip} can be recognised clearly. The figure illustrates that even small deviations from the optimal parameter set (<10\%) result in significantly decreasing performance.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=\linewidth]{Fig/opensimu.pdf}
-\caption{Open-loop backflip simulation results: the position is displayed on the left, and the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right.}\label{fig:opensimu}
+\includegraphics[width=\linewidth]{Fig/opensimu2.pdf}
+\caption{Open-loop backflip simulation results: the position is displayed on the left, and the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right. Orange lines represent the simulation with optimal parameters in \eqref{eq:optparam}, and grey lines represent the result of small changes in the parameter set.}\label{fig:opensimu}
 \end{figure}
 
 

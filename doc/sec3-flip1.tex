@@ -1,7 +1,7 @@
 \section{Optimization-based open-loop control}\label{sec:flip}
 The flip maneuver is a 360 degree rotation around one of the horizontal axes of the quadcopter body frame. In the literature there are several different approaches to perform the maneuver, for example based on apprenticeship learning \cite{abbeel2010}, energy-based control \cite{energy-quaternion}, or Lyapunov method \cite{lyapunov-flip}. We decided to first apply an  open-loop control method based on the optimization of a parametrized motion primitive sequence \cite{LSICRA2010}.
 
-In this section, firstly the 2D equations of motion of the quadrotor are derived that is suitable for the applied control method. Then the parametrized primitive is described which consists of the sections of the maneuver, both beginning and ending in hover mode. Finally, the optimization problem of the primitive parameters is presented, and two different methods for the solution. 
+In this section, firstly the 2D equations of motion of the quadrotor are derived that is suitable for the applied control method. Afterwards, the parametrized primitive is described which consists of the sections of the maneuver, both beginning and ending in hover mode. Finally, the optimization problem of the primitive parameters is presented, and two different methods for the solution. 
 %With the optimised parameter set, simulation results will be demonstrated. Finally, the implementation of the flip controller on the Crazyflie quadrotor, and experimental results will be discussed.
 
 \subsection{2D Quadrotor model}
@@ -85,7 +85,7 @@ P^* &= \argmin_P \|E\|_2.
 \end{align} 
 \end{subequations}
 
-In the original paper \cite{LSICRA2010}, the numerical optimization of the five parameters is based on iterative learning, using the approximate Jacobian matrix of the final state error w.r.t the parameter vector. However, the numerical gradient approximation has vast computational cost, because the whole maneuver needs to be simulated in every approximation step. Thus we have chosen Bayesian optimization which does not require any functional form and is suitable for global optimization of cost functions that are expensive to evaluate \cite{frazier2018tutorial, bayesopt2, brochu2010tutorial}.
+In the original paper \cite{LSICRA2010}, the numerical optimization of the five parameters is based on iterative learning, using the approximate Jacobian matrix of the final state error w.r.t the parameter vector. However, the numerical gradient approximation has vast computational cost, because the whole maneuver needs to be simulated in every approximation step. Hence we have chosen Bayesian optimization which does not require any functional form and is suitable for global optimization of cost functions that are expensive to evaluate \cite{frazier2018tutorial, bayesopt2, brochu2010tutorial}.
 
 The main concept of Bayesian optimization is to treat the unknown objective function as a random function in a parametric structure, fit the model parameters using Bayesian inference techniques, and maximize the output of the fitted surrogate model. The high-level steps of the optimization method are described in Algorithm \ref{alg:bayes}.
 \begin{algorithm}
@@ -103,6 +103,7 @@ The main concept of Bayesian optimization is to treat the unknown objective func
 	\State Return a solution: either the point evaluated with the largest $f(x)$, or the point with the largest posterior mean
 \end{algorithmic}
 \end{algorithm}
+
 There are multiple methods to define the parametric structure, the most common of which is using \textit{Gaussian processes} (GPs) \cite{GPMPC2019}. GP provides a flexible, nonlinear structure representing a single layer neural network, depends on relatively few parameters and its training is fast and efficient. Moreover, the covariance of GP gives a measure of the uncertainty of the approximation which is then used to systematically select the next evaluation point of the optimizer, and thus help the balance between exploration and exploitation.
 
 By definition, a Gaussian process $\mathcal{GP}: \mathbb{R}^{d} \rightarrow \mathbb{R}$ is a mapping that assigns to every point $x \in \mathbb{R}^{d}$ a random variable $\mathcal{G} \mathcal{P}(x) \in \mathbb{R}$ such that for any finite set $x^{(1)} \ldots x^{(n)}$ the joint probability distribution of $\mathcal{G} \mathcal{P}\left(x^{(1)}\right), \ldots, \mathcal{G} \mathcal{P}\left(x^{(n)}\right)$ is Gaussian with mean $m$ and covariance $K$, expressed as
