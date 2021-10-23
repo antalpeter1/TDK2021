@@ -4,7 +4,7 @@ In this section, real-world implementation of the two approaches to perform the 
 \begin{figure}[b]
 \centering
 \includegraphics[width=.8\textwidth]{Fig/system.pdf}
-\caption{Block diagram of the experimental setup: indoor quadcopter navigation with internal and external measurement system.}
+\caption[Block diagram of the experimental setup]{Block diagram of the experimental setup: indoor quadcopter navigation with internal and external measurement system.}
 \label{fig:sys}
 \end{figure}
 
@@ -68,7 +68,7 @@ Although OptiTrack is a very precise and efficient measurement device, sometimes
 \setlength{\fboxsep}{0pt}%
 \setlength{\fboxrule}{1pt}%
 \fbox{\includegraphics[width=.6\textwidth]{Fig/dronepic.jpg}}
-\caption{Experimental setup for the presented measurement results: 2 OptiTrack Prime 13 infrared cameras and a Crazyflie 2.1 quadcopter with reflective markers.}
+\caption[Experimental setup for the presented measurement results]{Experimental setup for the presented measurement results: 2 OptiTrack Prime 13 infrared cameras and a Crazyflie 2.1 quadcopter with reflective markers.}
 \end{figure}
 
 \subsection{Backflip maneuver implementation}\label{sec:implementation}
@@ -141,23 +141,27 @@ U_1^\mathrm{exp} & t_1^\mathrm{exp} & t_3^\mathrm{exp} & U_5^\mathrm{exp}& t_5^\
 \end{align*}
 The measurement results are displayed in Figure \ref{fig:openmeas}, showing the trajectory of the position and orientation during the maneuver. It is important to note that an additional lift phase is added to the implementation to gain enough vertical velocity and height, because the quadcopter falls a significant distance in the recovery phase. During the additional lift phase the PID controller is used to achieve exact vertical lifting and horizontal orientation.
 
-Figure \ref{fig:openmeas} shows that the flip is executed with almost zero final error in the pitch, and also quite small position error. 
+Figure \ref{fig:openmeas} shows that the flip is executed with almost zero final error in the pitch, and also quite small position error. Compared to the simulation displayed in Figure~\ref{fig:opensimu}, the maximal displacement from the origin in $x$ direction is around a half, and in $z$ direction around double. The difference is due to the manual refinement of the motion sequence parameters, and the uncertainties of the simulation model. It is important to note that the performance of the open-loop controller is very sensitive to uncertainties in the dynamics and initial conditions. For example, if the flip maneuver begins when the orientation of the quadcopter is not exactly horizontal, the stability can be lost at the recovery phase. Hence the open-loop flip is only successful in about 6-7 trials out of 10.
+\newpage
+\begin{figure}
+\centering
+\includegraphics[width=.8\linewidth]{Fig/openmeast.pdf}
+\caption[Backflipping measurement results with open-loop control]{Backflipping measurement results with open-loop control. The position and pitch angle of the quadcopter are displayed.}\label{fig:openmeas}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=.8\linewidth]{Fig/geommeast2.pdf}
+\caption[Backflipping measurement results with geometric control]{Backflipping measurement results with geometric control. The trajectories show that the maneuver is performed successfully, and the drone gets back to the initial position at the end.}\label{fig:geommeas}
+\end{figure}
 
 The experimental results of the backflipping with geometric control are displayed in Figure~\ref{fig:geommeas}. The most important part of reference tracking is the pitch angle $\theta$, because a fast, stable and accurate attitude tracking is required to perform the flip maneuver, and recover successfully. As it is shown on the upright plot of the measurement results, the pitch is very close to the reference. 
 
-However, the error of the position tracking is significantly higher during the maneuver, both in $x$ and $z$ directions. There are many possible reasons of the high positioning error, the following are the most likely. Firstly, we assume at the trajectory design that the orientation is equal to the reference at all time steps, which is not far from reality, but there is always a non-zero attitude tracking error. It was another assumption of trajectory design that the derivative of the control input can be arbitrarily large, the optimization problem formulation does not include an error term or constraint for this variable. However, when the quadcopter is upside down, a near-minimal collective thrust is required, and shortly after a near-maximal thrust to recover and follow the reference, as it is illustrated in Figure \ref{fig:geommeas}. Small DC motors are usually modelled as first order systems with a small time constant, but here the transient can be significant, the motor needs time to build the thrust of the propellers. The third possible explanation is also connected to model uncertainty. The modelling of aerodynamic effects such as blade flapping, induced drag or downwash \cite{quad_model} are very complex, therefore we exclude these terms from the dynamic model, however, they can have a negative effect on the performance of the feedback controller when performing the backflip maneuver.
+However, the error of the position tracking is significantly higher during the maneuver, both in $x$ and $z$ directions. There are many possible reasons of the high positioning error, the following are the most likely. Firstly, we assume at the trajectory design that the orientation is equal to the reference at all time steps, which is not far from reality, but there is always a non-zero attitude tracking error. It was another assumption of trajectory design that the derivative of the control input can be arbitrarily large. However, when the quadcopter is upside down, a near-minimal collective thrust is required, and shortly after a near-maximal thrust to recover and follow the reference, as it is illustrated in Figure \ref{fig:geommeas}. Small DC motors are usually modelled as first order systems with a small time constant, but here the transient can be significant, the motor needs time to build up the thrust of the propellers. The third possible explanation is also connected to model uncertainty. The modelling of aerodynamic effects such as blade flapping, induced drag or downwash \cite{quad_model} are very complex, therefore we exclude these terms from the dynamic model, however, they can have a negative effect on the performance of the feedback controller when performing the backflip maneuver.
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{Fig/openmeast.pdf}
-\caption{Backflipping measurement results with open-loop control.}\label{fig:openmeas}
-\end{figure}
+In spite of the imperfect position tracking, the geometric controller is able to perform the backflip maneuver exactly the same way ten out of ten times, which indicates that it is significantly more robust than the open-loop method. Even with smaller changes on the dynamic behaviour of the quadcopter (e.g. replacing a reflective marker with a larger one), the maneuver is performed successfully and the drone remains stable.
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{Fig/geommeast2.pdf}
-\caption{Backflipping measurement results with geometric control.}\label{fig:geommeas}
-\end{figure}
+
 
 \begin{figure}
 \setlength{\fboxsep}{0pt}%
@@ -166,23 +170,23 @@ However, the error of the position tracking is significantly higher during the m
 \begin{subfigure}{.45\textwidth}
   \centering
   \fbox{\includegraphics[height=6cm]{Fig/opencomp.png}}
-  \caption{Optimization-based open-loop control, the trajectory is displayed in Fig. \ref{fig:openmeas}}
+  \caption{Optimization-based open-loop control, the trajectory is displayed in Fig. \ref{fig:openmeas}.}
   \label{fig:sub1}
 \end{subfigure}%
 \hspace{1cm}
 \begin{subfigure}{.45\textwidth}
   \centering
   \fbox{\includegraphics[height=6cm]{Fig/geomcomp.png}}
-  \caption{Geometric reference tracking control, the trajectory is displayed in Fig. \ref{fig:geommeas}}
+  \caption{Geometric reference tracking control, the trajectory is displayed in Fig. \ref{fig:geommeas}.}
   \label{fig:sub2}
 \end{subfigure}
-\caption{Composite images of the measurement results with both proposed control methods. A video of the measurements is available at \textit{\textbf{TODO}}}
+\caption[Composite images of the measurement results]{Composite images of the measurement results with both proposed control methods. A video of the measurements is available at \url{https://youtu.be/AhqfXZ-CPqM}.}
 \label{fig:test}
 \end{figure}
 
 \subsection{Robustness and scalability for multiple drones}
 The presented measurement results are satisfactory for both control methods, the quadcopter performed a backflip maneuver successfully. However, the open-loop approach is very sensitive to parameter uncertainties, therefore it needs specific tuning for each Crazyflie. Moreover, it is also sensitive to initial conditions, because the open-loop control input is the same even if there is a nonzero angle or displacement at the starting point. Hence the quality of the maneuver often varies even with the manually refined parameters. Due to the inconsistency of the performance, we could not apply the open-loop control for simultaneous flip with multiple drones.
 
-However, geometric tracking control overcomes the problematics caused by parameter uncertainties using feedback, providing a highly robust and consistent performance for the backflip maneuver. Utilizing the robustness of the control approach, the maneuver has been implemented for simultaneous backflipping with three drones. A video of the acrobatic maneuver is available at \textbf{\textit{TODO}}. The implementation of the simultaneous flip differs from the single maneuver discussed in Section \ref{sec:implementation} only in the high-level script. The trajectory of each drone during the maneuver is evaluated relatively to their initial position and orientation, making it easy to extend the single flip implementation. % In the high-level script we send each drone to their initial pose, and send the command to start the flip. Afterwards, the quadcopters hover at the initial pose and wait for the next command, for example to land.
+However, geometric tracking control overcomes the problematics caused by parameter uncertainties using feedback, providing a highly robust and consistent performance for the backflip maneuver. Utilizing the robustness of the control approach, the maneuver has been implemented for simultaneous backflipping with three drones. A video of the acrobatic maneuver is available at \url{https://youtu.be/AhqfXZ-CPqM}. The implementation of the simultaneous flip differs from the single maneuver discussed in Section \ref{sec:implementation} only in the high-level script. The trajectory of each drone during the maneuver is evaluated relatively to their initial position and orientation, making it easy to extend the single flip implementation. % In the high-level script we send each drone to their initial pose, and send the command to start the flip. Afterwards, the quadcopters hover at the initial pose and wait for the next command, for example to land.
 
-The scalability of the proposed control algorithms for other types of quadcopters (e.g. medium or large-sized) is out of the scope of this work, however, the possibilities are briefly discussed in the followings. The open-loop method is applied in \cite{LSICRA2010} to a medium-sized drone successfully, therefore we are convinced that our modified version could also be applied to other types. Geometric control is even more general than the open-loop approach, it is applied not only for different types of quadcopters \cite{turpinkumar2011}, but also for other autonomous systems, such as robotic manipulators \cite{bullo2004}.
+The scalability of the proposed control algorithms for other types of quadcopters (e.g. medium or large-sized) is out of the scope of this work, however, the possibilities are briefly discussed in the followings. The open-loop method is applied in \cite{LSICRA2010} to a medium-sized drone successfully, therefore we are convinced that our modified version could also be applied to other types. Geometric control is even more general than the open-loop approach, it is applied not only for different types of quadcopters \cite{turpinkumar2011}, but also for other autonomous systems, such as robotic manipulators \cite{bullo2004}. Hence the proposed control algorithms could be used in industrial applications, as well.

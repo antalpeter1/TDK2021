@@ -28,7 +28,7 @@ In this section, the applied simulation framework and the implemented simulation
 
 After some literature survey about drone simulators such as \cite{airsim2017} and \cite{flightmare2020}, we decided to choose an OpenAI Gym environment based on PyBullet \cite{gym}. This framework is written in Python language, contains the physical model and parameters of the Bitcraze Crazyflie 2.1, has built-in multi-agent control, and tuned PID controller for the drone. There are also some simple examples for trajectory tracking, and reinforcement learning with a swarm of drones.
 
-All of the simulation code used in this work is available at GitHub\footnote{\url{https://github.com/antalpeter1999/TDK2021}}, the Python code is in the simulations/crazyflie-demo-simulation repository, and the Matlab code is in the trajectory-design repository.
+All of the simulation code used in this work is available at GitHub\footnote{\url{https://github.com/antalpeter1999/TDK2021}}, the Python code is in the simulations/crazyflie-demo-simulation repository, and the Matlab code is in the trajectory-design repository. A video illustrating the simulation results is available at \url{https://youtu.be/AhqfXZ-CPqM}.
 
 \subsection{Optimized open-loop control}\label{sec:opensimu}
 Based on the control approach presented in Section~\ref{sec:flip}, we implemented the open-loop flip controller which evaluates the five sections of the parametrized motion primitive. For the optimization of the parameters defined in \eqref{eq:openparams}, we utilize the Bayesian Optimization Python module \cite{bayesopt}.% The source code is available at \url{https://github.com/antalpeter1999/gym-pybullet-drones-0.5.2}.
@@ -50,7 +50,7 @@ where $m$ is the mass of the quadcopter. Simulation results are displayed in Fig
 \begin{figure}[!h]
 \centering
 \includegraphics[width=\linewidth]{Fig/opensimu2.pdf}
-\caption{Open-loop backflip simulation results: the position is displayed on the left, and the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right. Orange lines represent the simulation with optimal parameters in \eqref{eq:optparam}, and grey lines represent the result of small changes in the parameter set.}\label{fig:opensimu}
+\caption[Open-loop backflip simulation results]{Open-loop backflip simulation results: the position is displayed on the left, and the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right. Orange lines represent the simulation with optimal parameters in \eqref{eq:optparam}, and grey lines represent the result of small changes in the parameter set.}\label{fig:opensimu}
 \end{figure}
 
 
@@ -87,13 +87,13 @@ The quadcopter follows the designed reference trajectory with geometric tracking
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{Fig/geomsimu.pdf}
-    \caption{Backflipping simulation results with geometric control: position and attitude on the left, the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right.}\label{fig:geomsimu}
+    \caption[Backflipping simulation results with geometric control]{Backflipping simulation results with geometric control: position and attitude on the left, the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right.}\label{fig:geomsimu}
     \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{Fig/geomsimu2.pdf}
-    \caption{Backflipping simulation results with geometric control. The position reference constraint is different for each simulation, illustrated by the dashed lines.}\label{fig:geomsimu2}
+    \caption[Backflipping simulation results with geometric control: the effect of position constraints]{Backflipping simulation results with geometric control. The position reference constraint is different for each simulation, illustrated by the dashed lines.}\label{fig:geomsimu2}
 \end{figure}
  
  It can be seen that the orientation reference tracking is more precise than the position. Fast and accurate attitude tracking is required to stabilize the quadcopter, however, the reference trajectory is designed with the assumption that the attitude equals to the reference at all times, therefore there are more significant errors in the position.
