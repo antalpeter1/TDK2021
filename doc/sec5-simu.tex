@@ -65,10 +65,10 @@ where $m$ is the mass of the quadcopter. Simulation results are displayed in Fig
 \subsection{Trajectory planning and geometric control}
 
 The second control approach to perform a flip maneuver is trajectory planning and reference tracking with geometric control. Based on the results of the flip with open-loop control, the parameters of the reference pitch trajectory are chosen to $\alpha=20$~1/s, $\beta=0.45$~s, as illustrated in Figure \ref{fig:attref}. In the quadratic programming problem \eqref{eq:quadprog} we use the following parameters:
-\begin{align*}
-    \begin{bmatrix} x_- \\ x_+ \\ z_- \\ z_+ \end{bmatrix} =  \begin{bmatrix} -0.6 \\ 0.1 \\ -0.2 \\ 0.5 \end{bmatrix}\;\mathrm{m};\quad F_\mathrm{max} = 0.64\;\mathrm{N}; \quad T_s = 1/480\;\mathrm{s}.
-\end{align*}
-The maximal collective thrust $F_\mathrm{max}$ is from \cite{Forster}, and the position bounds are chosen such that the trajectory is feasible, and the quadcopter does not get too far from the initial point. The duration of the flip is chosen to $T=0.9$~s, thus the number of simulation steps is $N=T/T_s=432$. The quadratic optimization problem is solved by the \verb+quadprog+ function of Matlab with negligible computation time. The result is the optimal control input and reference position sequence given in the discrete time instants.
+\begin{align}
+    \mathcal{X}:\;\begin{bmatrix} x_- \\ x_+ \\ z_- \\ z_+ \end{bmatrix} =  \begin{bmatrix} -0.6 \\ 0 \\ -0.05 \\ 0.45 \end{bmatrix}\;\mathrm{m};\quad \mathcal{U}:\;F \in [0,0.64]\;\mathrm{N}; \quad T_s = 1/480\;\mathrm{s}.
+\end{align}
+The maximal collective thrust $F_\mathrm{max}=0.64$ N is from \cite{Forster}, and the position bounds are chosen such that the trajectory is feasible, and the quadcopter does not get too far from the initial point. The duration of the flip is chosen to $T=0.9$~s, thus the number of simulation steps is $N=T/T_s=432$. The quadratic optimization problem is solved by the \verb+quadprog+ function of Matlab with negligible computation time. The result is the optimal control input and reference position sequence given in the discrete time instants.
 
 The official Crazyflie 2.1 firmware has built-in trajectory evaluation algorithm for 7th degree polynomials\footnote{\url{https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/functional-areas/trajectory_formats/}}, therefore we fit such functions to the optimal position sequence, and use it as the reference for the flip maneuver. As both the $x$ and $z$ solution are smooth, the 7th degree polynomials can be fitted with almost zero error using the Curve Fitting Toolbox of Matlab.
 
@@ -89,6 +89,12 @@ The quadcopter follows the designed reference trajectory with geometric tracking
     \includegraphics[width=\linewidth]{Fig/geomsimu.pdf}
     \caption{Backflipping simulation results with geometric control: position and attitude on the left, the pitch angle $\theta$, pitch angular velocity $\dot{\theta}$, and collective thrust $F$ on the right.}\label{fig:geomsimu}
     \end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{Fig/geomsimu2.pdf}
+    \caption{Backflipping simulation results with geometric control. The position reference constraint is different for each simulation, illustrated by the dashed lines.}\label{fig:geomsimu2}
+\end{figure}
  
  It can be seen that the orientation reference tracking is more precise than the position. Fast and accurate attitude tracking is required to stabilize the quadcopter, however, the reference trajectory is designed with the assumption that the attitude equals to the reference at all times, therefore there are more significant errors in the position.
  
