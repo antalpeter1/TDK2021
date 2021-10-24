@@ -34,7 +34,8 @@
 \renewcommand{\baselinestretch}{1.15}\normalsize % vissza az eredetire
 \pagebreak
 %\include{abstract-eng}
-%\include{abstract-hun}
+\addcontentsline{toc}{section}{Kivonat}
+\include{abstract-hun}
 
 \pagenumbering{arabic}
 
@@ -46,8 +47,9 @@
 \include{sec6-meas}
 \include{sec7-summary}
 \newpage
+\addcontentsline{toc}{section}{List of Figures}
 \listoffigures
 \pagebreak
-\bibliography{reference.bib}
 \addcontentsline{toc}{section}{References}
+\bibliography{reference.bib}
 \end{document}

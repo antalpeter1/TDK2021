@@ -111,7 +111,7 @@ where $\mathbf A_d, \mathbf B_d$ are the discrete state space matrices, $\mathbf
         &\{u_{k}\}_{k=0}^N \in \mathcal{U},
     \end{align}
 \end{subequations}
-where $\mathbf Q_k\in \mathbb{R}^{4\times 4}$ and $R_k \in\mathbb{R}$ are weight matrices, and $\mathcal{X}, \mathcal{U}$ are the sets of constraints for the states and the control input, respectively. In this case, we can specify linear constraints for the states, for example $x\in[x_-,x_+], z\in[z_-, z_+]$, and also linear constraint for the control input, namely
+where $\mathbf Q_k\in \mathbb{R}^{4\times 4}$ and $R_k \in\mathbb{R}$ are weight matrices, and $\mathcal{X}, \mathcal{U}$ are the sets of constraints for the states and the control input, respectively. In this case, we can specify linear constraints for the states, for example $x\in[x_-,x_+], z\in[z_-, z_+]$ to model the available space for the maneuver avoiding collisions with other objects or walls. We also define linear constraints for the control input, namely
     \begin{align}
         \frac{\norm{\tau_k}}{l} \leq u_k = F_k \leq F_\mathrm{max}-\frac{\norm{\tau_k}}{l},
     \end{align}
@@ -123,7 +123,8 @@ The only objective of the trajectory design is to minimize the final position er
 \end{equation}
 As all the other weights are zero, it is only required to specify a final state position reference that is defined as
 \begin{equation}
-    \mathbf x_{d,N} = \begin{bmatrix} x_{d,N} \\ \dot{x}_{d,N} \\ {\tilde{z}}_{d,N} \\ \dot{\tilde{z}}_{d,N} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \frac{1}{2}g(T_s N)^2 \\ 0 \end{bmatrix}.
+    \mathbf x_{d,N} = \begin{bmatrix} x_{d,N} \\ \dot{x}_{d,N} \\ {\tilde{z}}_{d,N} \\ \dot{\tilde{z}}_{d,N} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \frac{1}{2}g(T_s N)^2 \\ 0 \end{bmatrix},
 \end{equation}
+where ${\tilde{z}}_{d,N}$ contains the effect of gravity during the time span of the maneuver.
 
 The solution of a quadratic optimization program with linear constraints is a built-in feature of most engineering programming languages, for example the \verb+quadprog+ function in Matlab. 
