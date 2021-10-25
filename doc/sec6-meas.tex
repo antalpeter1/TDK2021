@@ -76,6 +76,35 @@ In the Crazyswarm framework (running on the workstation PC) there are built-in e
 
 Our own implementation is a modified version of Crazyswarm, available at the GitHub repository \verb+TDK2021/real_quadcopter/crazyswarm+\footnote{\url{https://github.com/antalpeter1999/TDK2021}}. Our main contributions are in the controller of the firmware (open-loop and geometric control), and in the Python API for high-level commands, and simultaneous control of multiple drones.
 
+\subsubsection{Motor characteristics correction}
+In the early implementation phase of the open-loop control, we noticed that there is a significant difference between the characteristics of each motor on a Crazyflie quadcopter. As it is shown in Figure \ref{fig:motors2}, there is more than 3000 rpm and 18\% difference between the angular speed of motor M1 and M2 when the quadcopter is hovering, although the angular speeds should be equal based on the dynamic model. This effect results in the offset of the torque control inputs in all directions, as it is illustrated in Figure \ref{fig:motors} when $t<3$ s.
+
+However, we implemented a correction algorithm to overcome the negative effect on the performance of the backflip. 
+
+\begin{figure}[!h]
+  \centering
+  \begin{subfigure}[t]{.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Fig/motor_offset_2.pdf}
+  \caption{Angular speed of the four rotors: in hover mode the values should be equal. }\label{fig:motors2}
+  \end{subfigure}
+  \hspace{1cm}
+  \begin{subfigure}[t]{.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Fig/motor_offset.pdf}
+  \caption{Torque control input: the correction is activated at $t=3$ s, after which the mean of the control inputs are zero.}\label{fig:motors}
+  \end{subfigure}%
+  \caption{Motor characteristics correction in hovering.}
+  \label{fig:motor}
+  \end{figure}
+%\begin{figure}
+%  \centering
+%  \includegraphics[width=.8\linewidth]{Fig/motor_offset_2.pdf}
+%  \caption[Motor offset correction]{Motor characteristics correction in hover mode: the left plot shows the torque control input. The correction is activated at $t=3$ s, after which the mean of the control inputs are zero. The right plot shows the angular speed of each rotor, in hover mode these should be equal. }\label{fig:motors}
+%  \end{figure}
+
+\subsubsection{Implementation algorithms}
+
 The high-level script to perform a backflip maneuver is quite simple, because all control algorithms are implemented on-board. However, we need to build and flash the firmware of the quadcopter MCU after every change in the source code, therefore parameter setting and execution of high-level tasks is easier using Python scripts. The steps of the high-level script to perform the backflip are illustrated in Algorithm \ref{alg:hl}.
 
 \begin{algorithm}
