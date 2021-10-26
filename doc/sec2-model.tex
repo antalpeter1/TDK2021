@@ -41,7 +41,7 @@ In our model, there are two forces acting on the vehicle: the collective thrust 
 f = R_b^v\begin{bmatrix} 0\\0\\-F \end{bmatrix} + \begin{bmatrix} 0\\0\\mg \end{bmatrix},
 \end{equation}
 where $F$ is the collective thrust of the propellers, and $g$ is the gravitational acceleration.
-
+\newpage
 \subsection{Rotational dynamics} \label{sec:rotation}
 
 There are multiple ways to describe the rotational motion of a rigid body in 3D space, three of which are presented in this work. The most common and simple way is to use local coordinates to describe the attitude with three axes, and three rotation angles around them. An example is the RPY angle representation mentioned in Section \ref{sec:frames}, where the three axes are the body $z, y, x$ axes, and the three angles are the yaw ($\psi$), pitch ($\theta$) and roll ($\phi$), respectively. Although this approach is intuitive and commonly used, it has two major drawbacks. The first is that it is only valid in a certain region of the attitude, for example $-\pi/2 \leq \phi \leq \pi/2,\; -\pi/2 \leq \theta \leq \pi/2,\; 0 \leq \psi \leq 2\pi$. The second is the so called \textit{gimbal lock}, meaning that a degree of freedom is lost if two axes become parallel out of the three. In case of the flip maneuver, when the pitch is 90 degrees, the yaw axis is parallel to the roll axis, and the compensation for the yaw changes is not possible. Due to these drawbacks, RPY (or Euler) angles are used only for slower maneuvering and trajectory tracking, but for aggressive maneuvers other,  more suitable modelling approaches are needed .

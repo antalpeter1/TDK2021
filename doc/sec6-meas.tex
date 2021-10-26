@@ -3,7 +3,7 @@ In this section, real-world implementation of the two approaches to perform the 
 
 \begin{figure}[b]
 \centering
-\includegraphics[width=.8\textwidth]{Fig/system.pdf}
+\includegraphics[width=.9\textwidth]{Fig/system.pdf}
 \caption[Block diagram of the experimental setup]{Block diagram of the experimental setup: indoor quadcopter navigation with internal and external measurement system.}
 \label{fig:sys}
 \end{figure}
@@ -77,9 +77,9 @@ In the Crazyswarm framework (running on the workstation PC) there are built-in e
 Our own implementation is a modified version of Crazyswarm, available at the GitHub repository \verb+TDK2021/real_quadcopter/crazyswarm+\footnote{\url{https://github.com/antalpeter1999/TDK2021}}. Our main contributions are in the controller of the firmware (open-loop and geometric control), and in the Python API for high-level commands, and simultaneous control of multiple drones.
 
 \subsubsection{Motor speed correction}
-In the early implementation phase of the open-loop control, we noticed that there is a significant difference between the characteristics of each motor on a Crazyflie quadcopter. As it is shown in Figure \ref{fig:motors2}, there is more than 3000 rpm and 18\% difference between the angular speed of motor M1 and M2 when the quadcopter is hovering, although the angular speeds should be equal based on the dynamic model. This effect results in the offset of the torque control inputs in all directions, as it is illustrated in Figure \ref{fig:motors} when $t<3$~s.
+In the early implementation phase of the open-loop control, we have noticed that there was a significant difference between the characteristics of each motor on a Crazyflie quadcopter. As it is shown in Figure \ref{fig:motors2}, there is more than 3000 rpm and 18\% difference between the angular speed of motor M1 and M2 when the quadcopter is hovering, although the angular speeds should be equal based on the dynamic model. This effect results in the offset of the torque control inputs in all directions, as it is illustrated in Figure \ref{fig:motors} when $t<3$~s.
 
-However, we implemented a correction algorithm to overcome the negative effect on the performance of the backflip. The \verb+motorCorrect+ method is called when the drone is hovering. For 3 seconds it averages the angular speed of each motor and afterwards the control inputs are corrected in order to avoid the offset, as it is shown in Figure  \ref{fig:motors} when $t>3$~s. The correction method has successfully improved the performance of the open-loop backflipping without complex identification of the actuator dynamics.
+Hence we have implemented a correction algorithm to overcome the negative effect on the performance of the backflip. The \verb+motorCorrect+ method is called when the drone is hovering. For 3 seconds it averages the angular speed of each motor and afterwards the control inputs are corrected in order to avoid the offset, as it is shown in Figure  \ref{fig:motors} when $t>3$~s. The correction method has successfully improved the performance of the open-loop backflipping without complex identification of the actuator dynamics.
 
 \begin{figure}[!h]
   \centering
@@ -102,7 +102,7 @@ However, we implemented a correction algorithm to overcome the negative effect o
 %  \includegraphics[width=.8\linewidth]{Fig/motor_offset_2.pdf}
 %  \caption[Motor offset correction]{Motor characteristics correction in hover mode: the left plot shows the torque control input. The correction is activated at $t=3$ s, after which the mean of the control inputs are zero. The right plot shows the angular speed of each rotor, in hover mode these should be equal. }\label{fig:motors}
 %  \end{figure}
-
+\newpage
 \subsubsection{Control algorithms}
 
 The high-level script to perform a backflip maneuver is quite simple, because all control algorithms are implemented on-board. However, we need to build and flash the firmware of the quadcopter MCU after every change in the source code, therefore parameter setting and execution of high-level tasks is easier using Python scripts. The steps of the high-level script to perform the backflip are presented in Algorithm \ref{alg:hl}.
@@ -133,6 +133,7 @@ The evaluation of the open-loop control law, i.e. the calculation of control inp
     \State Get back to initial position
   \end{algorithmic}
   \end{algorithm}
+  
 The second control approach, i.e. reference trajectory tracking with geometric control is also implemented on-board. The coefficients of the designed trajectory represented by 7th degree polynomials, and the corresponding time span are saved to a csv file after the simulations. In the Python API, it is loaded and sent to the Crazyflie with the tuned controller gains, before taking off. The on-board implementation of the control approach is detailed in Algorithm~\ref{alg:geom}. Similarly to the open-loop approach, the command to start the maneuver comes from the ground station, and then the backflip is performed automatically.
 \begin{algorithm}
   \cprotect\caption{\verb+performGeomFlip+ on-board implementation}
@@ -157,24 +158,24 @@ The second control approach, i.e. reference trajectory tracking with geometric c
 
 Experiments to perform the backflip maneuver started with the open-loop method. Firstly, we used the optimal parameter set from \eqref{eq:optparam}, but due to the differences of the simulation model and the real quadcopter dynamics, the drone almost performed a double flip with these parameters, and the stabilization was not successful at the end of the maneuver. After realizing the differences between the measurements and the simulations, we manually tuned the parameters so that the flip is executed with minimal final state error. The refined experimental parameter set is
 \begin{align*}
-    P^\mathrm{exp} = \begin{bmatrix}
+    p^\mathrm{exp} = \begin{bmatrix}
 U_1^\mathrm{exp} & t_1^\mathrm{exp} & t_3^\mathrm{exp} & U_5^\mathrm{exp}& t_5^\mathrm{exp}
 \end{bmatrix} ^\top =  \begin{bmatrix}
 14.29 & 0.2 & 0 & 14.29 & 0.075
 \end{bmatrix}^\top.
 \end{align*}
-The measurement results are displayed in Figure \ref{fig:openmeas}, showing the trajectory of the position and orientation during the maneuver. It is important to note that an additional lift phase is added to the implementation to gain enough vertical velocity and height, because the quadcopter falls a significant distance in the recovery phase. During the additional lift phase the PID controller is used to achieve exact vertical lifting and horizontal orientation.
+The measurement results are displayed in Figure \ref{fig:openmeas}, showing the trajectory of the position and orientation during the maneuver. It is important to note that an additional lift phase is added to the implementation to gain enough vertical velocity and height, because the quadcopter falls a significant distance in the recovery phase. During the additional lift phase the PID controller\footnote{\url{https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/functional-areas/sensor-to-control/controllers/\#cascaded-pid-controller}} is used to achieve exact vertical lifting and horizontal orientation.
 
 Figure \ref{fig:openmeas} shows that the flip is executed with almost zero final error in the pitch, and also quite small position error. Compared to the simulation displayed in Figure~\ref{fig:opensimu}, the maximal displacement from the origin in $x$ direction is around a half, and in $z$ direction around double. The difference is due to the manual refinement of the motion sequence parameters, and the uncertainties of the simulation model. It is important to note that the performance of the open-loop controller is very sensitive to uncertainties in the dynamics and initial conditions. For example, if the flip maneuver begins when the orientation of the quadcopter is not exactly horizontal, the stability can be lost at the recovery phase. Hence the open-loop flip is only successful in about 6-7 trials out of 10.
-\begin{figure}[!b]
+\begin{figure}
 \centering
-\includegraphics[width=.8\linewidth]{Fig/openmeast.pdf}
+\includegraphics[width=.95\linewidth]{Fig/openmeast.pdf}
 \caption[Backflipping measurement results with open-loop control]{Backflipping measurement results with open-loop control. The position and pitch angle of the quadcopter are displayed.}\label{fig:openmeas}
 \end{figure}
 \newpage
 \begin{figure}
 \centering
-\includegraphics[width=.8\linewidth]{Fig/geommeast2.pdf}
+\includegraphics[width=\linewidth]{Fig/geommeast2.pdf}
 \caption[Backflipping measurement results with geometric control]{Backflipping measurement results with geometric control. The trajectories show that the maneuver is performed successfully, and the drone gets back to the initial position at the end.}\label{fig:geommeas}
 \end{figure}
 
@@ -192,18 +193,18 @@ In spite of the imperfect position tracking, the geometric controller is able to
 \centering
 \begin{subfigure}{.45\textwidth}
   \centering
-  \fbox{\includegraphics[height=6cm]{Fig/opencomp.png}}
+  \fbox{\includegraphics[height=7cm]{Fig/opencomp.png}}
   \caption{Optimization-based open-loop control, the trajectory is displayed in Fig. \ref{fig:openmeas}.}
   \label{fig:sub1}
 \end{subfigure}%
 \hspace{1cm}
 \begin{subfigure}{.45\textwidth}
   \centering
-  \fbox{\includegraphics[height=6cm]{Fig/geomcomp.png}}
+  \fbox{\includegraphics[height=7cm]{Fig/geomcomp.png}}
   \caption{Geometric reference tracking control, the trajectory is displayed in Fig. \ref{fig:geommeas}.}
   \label{fig:sub2}
 \end{subfigure}
-\caption[Composite images of the measurement results]{Composite images of the measurement results with both proposed control methods. A video of the measurements is available at \url{https://youtu.be/AhqfXZ-CPqM}.}
+\caption[Composite images of the measurement results]{Composite images of the measurement results with both proposed control methods implemented on a Bitcraze Crazyflie 2.1 quadcopter. A video of the measurements is available at \url{https://youtu.be/AhqfXZ-CPqM}.}
 \label{fig:test}
 \end{figure}
 

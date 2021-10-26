@@ -30,13 +30,13 @@
 \begin{document}
 \pagenumbering{Roman} % Roman numbering
 \input{titlepage.tex}
-\renewcommand{\baselinestretch}{0.85}\normalsize % kicsinyít
+%\renewcommand{\baselinestretch}{0.85}\normalsize % kicsinyít
 \pagebreak
 \tableofcontents
 \renewcommand{\baselinestretch}{1.15}\normalsize % vissza az eredetire
 \pagebreak
 %\include{abstract-eng}
-\addcontentsline{toc}{section}{Kivonat}
+\addcontentsline{toc}{section}{Összefoglaló}
 \include{abstract-hun}
 
 \pagenumbering{arabic}
@@ -49,8 +49,10 @@
 \include{sec6-meas}
 \include{sec7-summary}
 \newpage
+\renewcommand{\baselinestretch}{1.5}\normalsize
 \addcontentsline{toc}{section}{List of Figures}
 \listoffigures
+\renewcommand{\baselinestretch}{1.15}\normalsize
 \pagebreak
 \addcontentsline{toc}{section}{References}
 \bibliography{reference.bib}
