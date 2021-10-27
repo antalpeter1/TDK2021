@@ -27,14 +27,14 @@ In this section, the applied simulation framework and the implemented simulation
 
 After some literature survey about drone simulators such as \cite{airsim2017} and \cite{flightmare2020}, we decided to choose an OpenAI Gym environment based on PyBullet \cite{gym}. This framework is written in Python language, contains the physical model and parameters of the Bitcraze Crazyflie 2.1, has built-in multi-agent control, and tuned PID controller for the drone. There are also some simple examples for trajectory tracking, and reinforcement learning with a swarm of drones.
 
-All of the simulation code used in this work is available at GitHub\footnote{\url{https://github.com/antalpeter1999/TDK2021}}, the Python code is in the simulations/crazyflie-demo-simulation repository, and the Matlab code is in the trajectory-design repository. A video illustrating the simulation results is available at \url{https://youtu.be/AhqfXZ-CPqM}. In this section and the oncoming sections, we plot the measurement results with the $z$ axis pointing upwards (in contrast to the NED convention discussed in Section \ref{sec:model}), because the backflip maneuver is more illustrative this way.
+All of the simulation code used in this work is available at GitHub\footnote{\url{https://github.com/antalpeter1999/TDK2021}}, the Python code is in the \verb+simulations/crazyflie-demo-simulation+ repository, and the Matlab code is in the \verb+trajectory-design+ repository. A video illustrating the simulation results is available at \url{https://youtu.be/AhqfXZ-CPqM}. In this section and the oncoming sections, we plot the measurement results with the $z$ axis pointing upwards (in contrast to the NED convention discussed in Section \ref{sec:model}), because the backflip maneuver is more illustrative this way.
 
 \subsection{Optimized open-loop control}\label{sec:opensimu}
 Based on the control approach presented in Section~\ref{sec:flip}, we implemented the open-loop flip controller which evaluates the five sections of the parametrized motion primitive. For the optimization of the parameters defined in \eqref{eq:openparams}, we utilize the Bayesian Optimization Python module \cite{bayesopt}.% The source code is available at \url{https://github.com/antalpeter1999/gym-pybullet-drones-0.5.2}.
 
-The simulation starts with hovering for about 0.1 s, followed by executing the open-loop maneuver, and then switching back to PID control to stabilize the drone and bring back to the initial setpoint. The objective function of the optimizer uses the same simulation, and returns the norm of the final state error, as it is characterized in \eqref{eq:optim}. The optimal parameters were calculated with Bayesian optimization, using 250 random initial function evaluations and 1000 iterations. The numerical values of these are
+The simulation starts with hovering for about 0.1 s, followed by executing the open-loop maneuver, and then switching back to PID control to stabilize the drone and bring back to the initial setpoint. The objective function of the optimizer uses the same simulation, and returns the norm of the final state error, as it is characterized in \eqref{eq:bayeserror}. The optimal parameters were calculated with Bayesian optimization as the solution of \eqref{eq:optim}, using 250 random initial function evaluations and 1000 iterations. The numerical values of these are
 \begin{align}\label{eq:optparam}
-P^*=\begin{bmatrix}
+p^*=\begin{bmatrix}
 U_1^* & t_1^* & t_3^* & U_5^*& t_5^*
 \end{bmatrix} ^\top =  \begin{bmatrix}
 17.5 & 0.12 & 0.16 & 17.95 & 0.075

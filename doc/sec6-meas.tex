@@ -103,7 +103,7 @@ Hence we have implemented a correction algorithm to overcome the negative effect
 %  \caption[Motor offset correction]{Motor characteristics correction in hover mode: the left plot shows the torque control input. The correction is activated at $t=3$ s, after which the mean of the control inputs are zero. The right plot shows the angular speed of each rotor, in hover mode these should be equal. }\label{fig:motors}
 %  \end{figure}
 \newpage
-\subsubsection{Control algorithms}
+\subsubsection{Control algorithm implementations}
 
 The high-level script to perform a backflip maneuver is quite simple, because all control algorithms are implemented on-board. However, we need to build and flash the firmware of the quadcopter MCU after every change in the source code, therefore parameter setting and execution of high-level tasks is easier using Python scripts. The steps of the high-level script to perform the backflip are presented in Algorithm \ref{alg:hl}.
 \begin{algorithm}
@@ -126,7 +126,7 @@ The evaluation of the open-loop control law, i.e. the calculation of control inp
   \begin{algorithmic}[1]
     \State Lift with PID control to gain momentum
       \While {the flip is not over}
-      \State Decide in which section we are (out of the 5 in Fig. \ref{fig:sections})
+      \State Decide which section we are in (out of the 5 in Fig. \ref{fig:sections})
       \State Apply the control input of the current section based on \eqref{eq:openinp}
     \EndWhile
     \State Stabilize the quadcopter with PID control

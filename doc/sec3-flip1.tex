@@ -1,7 +1,7 @@
 \section{Optimization-based open-loop control}\label{sec:flip}
-The flip maneuver is a 360 degree rotation around one of the horizontal axes of the quadcopter's body frame. In the literature there are several different approaches to perform the maneuver, for example based on apprenticeship learning \cite{abbeel2010}, energy-based control \cite{energy-quaternion}, or Lyapunov method \cite{lyapunov-flip}. We decided to first apply an  open-loop control method based on the optimization of a parametrized motion primitive sequence \cite{LSICRA2010}.
+The flip maneuver is a 360 degree rotation around one of the horizontal axes of the quadcopter's body frame. In the literature there are several different approaches to perform the maneuver, for example based on apprenticeship learning \cite{abbeel2010}, energy-based control \cite{energy-quaternion}, or Lyapunov method \cite{lyapunov-flip}. We decided to first apply an  open-loop control strategy based on the optimization of a parametrized motion primitive sequence \cite{LSICRA2010}.
 
-In this section, firstly the 2D equations of motion of the quadrotor are derived that is suitable for the applied control method. Afterwards, the parametrized primitive is described which consists of the sections of the maneuver, both beginning and ending in hover mode. Finally, the optimization problem of the primitive parameters is presented, and two different methods for the solution. 
+In this section, firstly the 2D equations of motion of the quadrotor are derived that is suitable for the applied control approach. Afterwards, the parametrized primitive is described which consists of the sections of the maneuver, both beginning and ending in hover mode. Finally, the optimization problem of the primitive parameters is presented, and two different methods for the solution. 
 %With the optimised parameter set, simulation results will be demonstrated. Finally, the implementation of the flip controller on the Crazyflie quadrotor, and experimental results will be discussed.
 
 \subsection{2D Quadrotor model}
@@ -37,34 +37,34 @@ z(t_0) = z(t_f) &= 0,\\
 \end{align}
 \end{subequations}
 We use a simple control strategy without explicit optimization for execution time. %Research has shown that for different types of dynamic systems, bang-bang control strategies provide near-optimal results, with small complexity \cite{KALMARNAGY2004,tdk2019}. 
-%The actions are chosen from a restricted control envelope, denoted as a range of accelerations $[\underline{\beta},\overline{\beta}]$, in order to take into consideration modelling uncertainties and reserve some resources for the on-board stabilizing controller. This restriction can be mathematically formulated for the rotating rotor thrusts as
+%The actions are chosen from a restricted control envelope, denoted as a range of accelerations $[\underline{\beta},\bar{\beta}]$, in order to take into consideration modelling uncertainties and reserve some resources for the on-board stabilizing controller. This restriction can be mathematically formulated for the rotating rotor thrusts as
 %\begin{align}
-%T_\mathrm{min} \leq \frac{m\underline{\beta}}{4}\leq F_{i} \leq\frac{m\overline{\beta}}{4} \leq T_\mathrm{max}.
+%T_\mathrm{min} \leq \frac{m\underline{\beta}}{4}\leq F_{i} \leq\frac{m\bar{\beta}}{4} \leq T_\mathrm{max}.
 %\end{align}
 The motion consists of five sections, all of which has two constant control inputs, the desired collective acceleration $U_\mathrm{des}$, and desired angular acceleration $\ddot{\theta}_\mathrm{des}$. These five steps are illustrated in Figure \ref{fig:sections}, and defined as follows.
-\renewcommand{\baselinestretch}{0.85}\normalsize 
-\begin{enumerate}
+
+\renewcommand{\baselinestretch}{1}\normalsize 
+\begin{enumerate}[itemsep=0mm]
 \item \textbf{Accelerate:} Gain elevation and kinetic energy with near-maximal collective acceleration, while rotating slowly to the negative direction.
 \item \textbf{Start Rotate:} Increase angular velocity with torque, i.e. maximal differential thrust.
 \item \textbf{Coast:} With low and uniform thrusts hold the angular velocity, wait for the drone to rotate.
 \item \textbf{Stop Rotate:} Use maximal differential thrust to decrease angular velocity and stop the rotation.
 \item \textbf{Recover:} Prevent the drone from falling to the ground by applying near-maximal collective thrust, and try to get back to hover mode.
 \end{enumerate}
-\renewcommand{\baselinestretch}{1.15}\normalsize
 
+\renewcommand{\baselinestretch}{1.15}\normalsize
 \begin{figure}
 \centering
 \includegraphics[scale=.7]{Fig/sections2.pdf}
 \caption{Parametrized flip primitive with the five sections.}\label{fig:sections}
 \end{figure}
-
-Each of the five sections has three parameters, the collective acceleration $U_i$, duration $t_i$, and angular acceleration $\ddot{\theta}_i$, resulting in 15 parameters altogether. However, we reduce the number of parameters using bang-bang type control on a restricted control envelope. The bang-bang approach means that the control actions $U_i$ and $\ddot\theta_i$ are either zero or near-maximal at all sections. Following the equations detailed in \cite{LSICRA2010}, 10 parameters out of 15 can be expressed using the properties of bang-bang control. The remaining 5 independent parameters are optimized to perform the desired backflip motion. The vector of these parameters is characterized as follows:
+Each of the five sections has three parameters, the collective acceleration $U_i$, duration $t_i$, and angular acceleration $\ddot{\theta}_i$, resulting in 15 parameters altogether. However, based on \cite{LSICRA2010}, we can reduce the number of parameters by applying bang-bang type control on a restricted control envelope. The bang-bang approach means that the control actions $U_i$ and $\ddot\theta_i$ are either zero or near-maximal at all sections. Following the equations detailed in \cite{LSICRA2010}, 10 parameters out of 15 can be expressed using the properties of bang-bang control. The remaining 5 independent parameters are optimized to perform the desired backflip motion. The vector of these parameters is characterized as follows:
 \begin{align}
 p=\begin{bmatrix}\label{eq:openparams}
 U_1 & t_1 & t_3 & U_5& t_5
 \end{bmatrix} ^\top.
 \end{align} 
-From the elements of $p$, the control input vector can be calculated as
+From the elements of $p$ and the corresponding equations detailed in \cite{LSICRA2010}, the control input vector can be calculated as
  \begin{align}\label{eq:openinp}
     \begin{bmatrix}
         F_i \\ \tau_i
@@ -74,29 +74,29 @@ From the elements of $p$, the control input vector can be calculated as
 \end{align}   
 where $m$ is the mass of the quadcopter, and the index $i$ is obtained from the current time and the duration of the sections.
 
-The five parameters are tuned in order to minimize the norm of the final state error $e\in\mathbb{R}^5$. The optimization problem is thus characterized as follows:
+The five parameters are tuned in order to minimize the norm of the final state error $e\in\mathbb{R}^5$. The optimization problem is characterized as follows:
 \begin{subequations}\label{eq:optim}
 \begin{align}
-e &= \begin{bmatrix}
-x(t_f) & z(t_f) & \dot{x}(t_f) & \dot{z}(t_f)& \theta(t_f)
-\end{bmatrix}^\top,\\
-p^* &= \argmin_p \left(e^\top e\right).
+&p^* = \argmin_p \left(e^\top e\right),\\
+&e = \begin{bmatrix}x(t_f) & z(t_f) & \dot{x}(t_f) & \dot{z}(t_f)& \theta(t_f)\end{bmatrix}^\top,\label{eq:bayeserror}\\
+&U_\mathrm{min}\leq U_i\leq U_\mathrm{max}\quad\; i=\{1,5\},\\
+&t_\mathrm{min}\leq t_j \leq t_\mathrm{max}\quad\quad j=\{1,3,5\},
 \end{align} 
 \end{subequations}
+where $U_\mathrm{min},\; U_\mathrm{max},\; t_\mathrm{min}$ and $t_\mathrm{max}$ are determined based on the parameters of the quadcopter.
 
 \subsection{Parameter optimization via numerical simulations}
-
 In the original paper \cite{LSICRA2010}, the numerical optimization of the five parameters in \eqref{eq:openparams} is based on iterative learning, using the approximate Jacobian matrix of the final state error w.r.t the parameter vector. However, the numerical gradient approximation has vast computational cost, because the whole maneuver needs to be simulated in every approximation step. 
 
 Hence we have chosen Bayesian optimization which does require derivatives and is suitable for global optimization of cost functions that are expensive to evaluate \cite{frazier2018tutorial, bayesopt2, brochu2010tutorial}. The general optimization problem is formulated as
 \begin{equation}
-    \max_{x\in A} f(x),
+    \min_{x\in A} f(x),
 \end{equation}
-where $x\in \mathbb{R}^d$ is the input (in our case the parameters $p$), $A$ is the feasible set typically given as a hyper-rectangle $\{x:a_i\leq x_i \leq b_i\}$, and $f$ is the objective function. Note that \eqref{eq:optim} is a minimization problem, thus we will use the negative objective function in Bayesian optimization.
+where $x\in \mathbb{R}^d$ is the input (in our case the parameters $p$), $A$ is the feasible set typically given as a hyper-rectangle $\{x:a_i\leq x_i \leq b_i\}$, and $f$ is the objective function.% Note that \eqref{eq:optim} is a minimization problem, thus we will use the negative objective function in Bayesian optimization.
 
-The main concept of Bayesian optimization is to evaluate the unknown objective function at limited number of points, fit a surrogate parametric model on the data and optimize the surrogate model instead of the original objective function. The optimization is performed iteratively, where in each step a new test point is assigned, the objective function is evaluated at these points and the surrogate model is updated. The optimization stops if the maximum is reached with high confidence or the iteration reaches a certain number of evaluations. 
+The main concept of Bayesian optimization is to evaluate the unknown objective function at limited number of points, fit a surrogate parametric model on the data and optimize the surrogate model instead of the original objective function. The optimization is performed iteratively, where in each step a new test point is assigned, the objective function is evaluated at these points and the surrogate model is updated. The optimization stops if the minimum is reached with high confidence or the iteration reaches a certain number of evaluations. 
 
-There are multiple approaches to define the surrogate parametric model, the most common of which is using \textit{Gaussian processes} (GPs) \cite{GPMPC2019}. GP provides a flexible, nonlinear structure representing a single layer neural network, depends on relatively few parameters and its training is fast and efficient. Moreover, the covariance of GP gives a measure of the uncertainty of the approximation which is then used to systematically select the next test point of the optimizer, and thus help the balance between exploration and exploitation.
+There are multiple approaches to define the surrogate parametric model, the most common of which is using \textit{Gaussian processes} (GPs) \cite{RW2006, GPMPC2019}. GP provides a flexible, nonlinear structure representing a single layer neural network, depends on relatively few parameters and its training is fast and efficient. Moreover, the covariance of GP gives a measure of the uncertainty of the approximation which is then used to systematically select the next test point of the optimizer, and thus help the balance between exploration and exploitation.
 
 By definition, a Gaussian process $\mathcal{GP}: \mathbb{R}^{d} \rightarrow \mathbb{R}$ is a mapping that assigns to every point $x \in \mathbb{R}^{d}$ a random variable $\mathcal{G} \mathcal{P}(x) \in \mathbb{R}$ such that for any finite set $x^{(1)} \ldots x^{(n)}$ the joint probability distribution of $\mathcal{G} \mathcal{P}\left(x^{(1)}\right), \ldots, \mathcal{G} \mathcal{P}\left(x^{(n)}\right)$ is Gaussian with mean $m$ and covariance $K$, expressed as
 \begin{subequations}
@@ -109,60 +109,60 @@ where $[\cdot]_{i j}$ denotes the $(i, j)$-th entry of a matrix and $\kappa$ is 
 
 The optimization starts with model selection, i.e. choosing a suitable mean and kernel function. By subtracting the mean of the data from all elements, constant zero mean is a common choice. The kernel is the core of the GP, it characterizes the function class in which we search the objective function. For smooth functions with approximately constant characteristic length the Squared Exponential kernel is a common and good choice, but there are also more complex kernel functions, e.g. the Matérn class.
 
-In Bayesian statistics, we suppose that every unknown variable is drawn from some \textit{prior probability distribution}. In GP regression, the prior is a multivariate normal distribution, generated by evaluating the mean and covariance function with an initial set of hyperparameters at $k$ points, formulated as
+In Bayesian statistics, we suppose that every unknown variable is drawn from some prior probability distribution. In GP regression, the \textit{prior distribution} is a multivariate normal distribution, generated by evaluating the mean and covariance function with an initial set of hyperparameters at $k$ points, formulated as
 \begin{equation}\label{eq:prior}
-    f(X) \sim \mathcal{N}(m_0(X),\kappa_0(X,X)),
+   p(y\mid X, \theta) = \mathcal{N}(m_0(X),\kappa_0(X,X)),
 \end{equation}
-where $\mathcal{N}$ denotes the normal distribution and $X=[x^{(1)}\dots x^{(k)}]$.
+where $p(\cdot)$ denotes the probability density function (p.d.f.), $\mathcal{N}(m,K)$ denotes the p.d.f. of normal distribution with mean $m$ and covariance $K$, $X=[x^{(1)}\dots x^{(n)}]$ and $y=f(X)$.
 
-Now suppose that we evaluated $f$ at $n$ points giving $X=[x^{(1)}\dots x^{(n)}]$, $\overline y =f(X) = [\overline y^{(1)}\dots \overline y^{(n)}]$, and we would like to predict the value of the objective function at a new test point $x_*$. To do so, we take the $n+1$ dimensional joint distribution $$p([y^{(1)},\dots,y^{(n)},y ] \mid [X,x_*],\theta),$$ and calculate the one dimensional conditional distribution 
+Assume that the hyperparameters have already been tuned by using the training dataset $\mathcal{T} = \{(\bar x^{(1)}, \bar y^{(1)})\dots (\bar x^{(n)},\bar y^{(n)})\}$ (the tuning procedure will be described later). If we would like to predict %Now suppose that we evaluated $f$ at $n$ points giving $X=[x^{(1)}\dots x^{(n)}]$, $\bar y =f(X) = [\bar y^{(1)}\dots \bar y^{(n)}]$, and we would like to predict 
+the value of the objective function at a new test point $x_*$, we take the $n+1$ dimensional joint distribution $$p(\mathbf{y} \mid [\bar X,x_*],\theta),$$ and calculate the one dimensional conditional distribution 
 \begin{equation}\label{eq:posterior}
-    p(y\mid x_*,y^{(1)}=\overline y^{(1)}, \dots ,y^{(n)}=\overline y^{(n)},X,\theta ),
+    p(y\mid [\bar X,x_*],\bar y,\theta ),
 \end{equation}
  which is called the \textit{posterior probability distribution}. The mean of \eqref{eq:posterior} is the approximation for $f(x_*)$, and the variance gives a measure of the uncertainty of the regression. The evaluation of a GP requires only elementary matrix operations, therefore it is computationally efficient. 
 
-So far we have not discussed the hyperparameter tuning, which is an important element of the regression. To choose the hyperparameters, the most common method is \textit{maximum likelihood estimate} (MLE). The likelihood is the probability of the observations $\overline{y}$ given the hyperparameters $\theta$, which is a multivariate normal distribution. In maximum likelihood estimation, we choose the hyperparameters such that they maximize this likelihood, formulated as follows:
+So far we have not discussed the hyperparameter tuning, which is an important element of the regression. To choose the hyperparameters, the most common method is \textit{maximum likelihood estimate} (MLE). The likelihood is the probability of the observations $\bar{y}$ given the hyperparameters $\theta$, which is a multivariate normal distribution. In maximum likelihood estimation, we choose the hyperparameters such that they maximize this likelihood, formulated as follows:
 \begin{equation}
-    \theta^* = \argmax_\theta p(\overline{y}\mid \theta).  
+    \theta^* = \argmax_\theta p(\bar y \mid \bar X, \theta),  
 \end{equation}
-There are also more complex hyperparameter tuning methods, for example maximum a posteriori (MAP) estimate or the fully Bayesian approach \cite{RW2006}. Here we only detailed MLE to provide a basic understanding about the hyperparameter choosing.
+where $ (\bar X, \bar y) $ is the training set. There are also more complex hyperparameter tuning methods, for example maximum a posteriori (MAP) estimate or the fully Bayesian approach \cite{RW2006}. Here we only detailed MLE to provide a basic understanding about the hyperparameter choosing.
 
 %Next step of the training is hyperparameter tuning, most commonly obtained by maximizing the \textit{marginal likelihood} of the training samples with respect to $\theta$. For proper scaling, often the logarithm of the likelihood is maximized, characterized by
 %\begin{align}
-%\log p(\overline{y} \mid {X}, {\theta}) &=\log \int_{-\infty}^{\infty} p(\overline{y} \mid f, {X}, {\theta}) p(f \mid {\theta}) \mathrm{d} f,
+%\log p(\bar{y} \mid {X}, {\theta}) &=\log \int_{-\infty}^{\infty} p(\bar{y} \mid f, {X}, {\theta}) p(f \mid {\theta}) \mathrm{d} f,
 %\\ &=\underbrace{-\frac{1}{2} {y}^{\top}\left({K}+\sigma_{\varepsilon}^{2} \mathbf{I}\right)^{-1} \mathbf{y}}_{\text {data-fit term }}-\underbrace{\frac{1}{2} \log \left|\mathbf{K}+\sigma_{\varepsilon}^{2} \mathbf{I}\right|}_{\text {complexity term }}-\frac{n}{2} \log (2 \pi)
 %\end{align}
-%where $\mathcal{T} = {(x^{(i)},\overline y^{(i)})}_{i=1}^n$ is the training set, $X=[x^{(1)}\dots x^{(n)}]$, $\overline y = [\overline y^{(1)}\dots \overline y^{(n)}]^\top$ and $p({y} \mid {X}, {\theta})$ denotes the $n$ dimensional joint Gaussian distribution of $\mathcal{GP}(x^{(1)})\dots\mathcal{GP}(x^{(n)})$. Since the gradient of the expression is easy to evaluate, a gradient ascent algorithm can be applied to maximize the marginal likelihood.
+%where $\mathcal{T} = {(x^{(i)},\bar y^{(i)})}_{i=1}^n$ is the training set, $X=[x^{(1)}\dots x^{(n)}]$, $\bar y = [\bar y^{(1)}\dots \bar y^{(n)}]^\top$ and $p({y} \mid {X}, {\theta})$ denotes the $n$ dimensional joint Gaussian distribution of $\mathcal{GP}(x^{(1)})\dots\mathcal{GP}(x^{(n)})$. Since the gradient of the expression is easy to evaluate, a gradient ascent algorithm can be applied to maximize the marginal likelihood.
 
-%The evaluation of a trained GP, i.e. the approximation of $f$ at a test point $x_*\in\mathbb{R}^d$ is calculated as follows. We take the $n+1$ dimensional joint distribution $$p([y^{(1)},\dots,y^{(n)},y ] \mid [X,x_*],\theta),$$ and calculate the one dimensional conditional distribution $$p(y\mid x_*,y^{(1)}=\overline y^{(1)}, \dots ,y^{(n)}=\overline y^{(n)},X,\theta ).$$ The mean of this distribution $m_*$ is the approximation for $f(x_*)$, and the variance $\sigma_*$ gives a measure of the uncertainty of the regression. The evaluation of a GP requires only elementary matrix operations, therefore it is computationally efficient.
+%The evaluation of a trained GP, i.e. the approximation of $f$ at a test point $x_*\in\mathbb{R}^d$ is calculated as follows. We take the $n+1$ dimensional joint distribution $$p([y^{(1)},\dots,y^{(n)},y ] \mid [X,x_*],\theta),$$ and calculate the one dimensional conditional distribution $$p(y\mid x_*,y^{(1)}=\bar y^{(1)}, \dots ,y^{(n)}=\bar y^{(n)},X,\theta ).$$ The mean of this distribution $m_*$ is the approximation for $f(x_*)$, and the variance $\sigma_*$ gives a measure of the uncertainty of the regression. The evaluation of a GP requires only elementary matrix operations, therefore it is computationally efficient.
 
-With a trained GP model and rules for the evaluation, we need an acquisition function to determine the next test point. The goal of the acquisition function is to balance between exploration and exploitation while trying to find the global maximum. A common acquisition function is \textit{expected improvement}, defined as follows. Suppose that we have already evaluated $f$ in $n$ points, and following the objective of the optimization the last observation is the best candidate, i.e. it has the largest value. Let $f_n^* = \max_{m\leq n}f(x_m)$ be the value at this point. 
+To implement the Bayesian optimization algorithm an acquisition function is needed. This function is constructed from the surrogate GP model and this is what we optimize actually at each iteration. The acquisition function blends the approximated objective (the mean of the GP) and the approximation uncertainty (the variance of the GP) in a scalar valued function that can be optimized by standard gradient-based procedure. Practically, the goal of the acquisition function is to balance between exploration and exploitation while trying to find the global minimum. A common acquisition function is \textit{expected improvement}, defined as follows. 
 
-Now we would like to choose the next test point $x_*$, after which the best evaluated value will either be $f(x_*)$ or $f_n^*$. The improvement in the value of the best evaluated point is then $f(x_*)-f_n^*$ if this difference is positive, and 0 otherwise. The improvement can be written more compactly as $[f(x_*)-f_n^*]^+$, where $a^+=\max(a,0)$. We would like to choose $x_*$ to maximize the improvement, however, we do not know $f(x_*)$ before the evaluation. What we can do is to take the expected value of the improvement given the observations and choose $x_*$ to maximize it. Hence we define the \textit{expected improvement} as the posterior distribution
+Suppose that we have already evaluated $f$ in $n$ points, and following the objective of the optimization the last observation is the best candidate, i.e. it has the lowest value. Let $f_n^* = \min_{m\leq n}f(x_m)$ be the value at this point. Now we would like to choose the next test point $x_*$, after which the best evaluated value will either be $f(x_*)$ or $f_n^*$. The improvement in the value of the best evaluated point is then $f_n^*-f(x_*)$ if this difference is positive, and 0 otherwise. The improvement can be written more compactly as $[f_n^*-f(x_*)]^+$, where $a^+=\max(a,0)$. We would like to choose $x_*$ to maximize the improvement, however, we do not know $f(x_*)$ before the evaluation. What we can do is to take the expected value of the improvement given the observations and choose $x_*$ to maximize it. Hence we define the \textit{expected improvement} as the posterior distribution
 \begin{equation}\label{eq:ei}
-    \mathrm{EI}_n(x_*):=E\left([f(x_*)-f_n^*]^+ \mid X,y\right),
+    \mathrm{EI}_n(x_*):=E\left([f_n^*-f(x_*)]^+ \mid X,y\right),
 \end{equation}
-where $E(\cdot)$ denotes the expected value, and $X,y$ are the $n$ evaluation points and observed values of $f$. The expected improvement in \eqref{eq:ei} can be evaluated in closed form, and hence the next test point is defined as
-\begin{equation}
+where $E(\cdot)$ denotes the expected value, and $X,y$ are the $n$ evaluation points and observed values of $f$. The expected improvement in \eqref{eq:ei} can be evaluated in closed form, and the next test point is defined as
+\begin{equation}\label{eq:acq}
     x_{n+1} = \argmax\mathrm{EI}_n(x_*),
 \end{equation}
 the point with largest expected improvement. In the literature, there are other common acquisition functions, e.g. knowledge gradient or entropy search \cite{frazier2018tutorial}.
 
-After describing the steps of Bayesian optimization with Gaussian processes, we summarize the method in Algorithm \ref{alg:bayes}.
+Based on \cite{frazier2018tutorial}, we summarize the steps of Bayesian optimization using a surrogate Gaussian process model in Algorithm \ref{alg:bayes}.
 \begin{algorithm}
-\caption{Basic pseudo-code for Bayesian optimization \cite{frazier2018tutorial}}
+\caption{Basic pseudo-code for Bayesian optimization}
 \label{alg:bayes}
 \begin{algorithmic}[1]
-	\State Place a Gaussian process prior on $f$ using \eqref{eq:prior}
-    \State Observe $f$ at $n_0$ initial points, set $n=n_0$
+    \State Evaluate $f$ at $n_0$ initial points, set $n=n_0$
+    \State Place a Gaussian process prior on $f$ using \eqref{eq:prior} (by tuning the hyperparameters)
     \While {$n\leq N$}
-    \State Update the posterior probability distribution on $f$ using \eqref{eq:posterior}
-    \State Let the next test point $x_n$ be a maximizer of the acquisition function over $x$, where the acquisition function is computed using the current posterior distribution
-    \State Evaluate $f$ at the new test point, $y_n = f(x_n)$
-    \State Tune the hyperparameters of the GP
+    \State Let the next test point $x_n$ be a maximizer of the acquisition function using \eqref{eq:acq} %over $x$, where the acquisition function is computed using the current posterior distribution
+    \State Evaluate $f$ at the new test point, $y_n = f(x_n)$ and add it to the training set
+     \State Update the posterior probability distribution on $f$ using \eqref{eq:posterior}
     \State $n=n+1$
 	\EndWhile
-	\State Return a solution: either the point evaluated with the largest $f(x)$, or the point with the largest posterior mean
+	\State Return a solution: either the point evaluated with minimal $f(x)$, or the point with minimal posterior mean
 \end{algorithmic}
 \end{algorithm}
 
