@@ -1,5 +1,5 @@
 %% Position trajectory design for quadcopter flip maneuver with geometric control
-
+% Requirements: Optimization Toolbox, Symbolic Math Toolbox
 %% Parameters of the Crazyflie 2.1
 m = 0.028;
 g = 9.81;
@@ -25,8 +25,8 @@ dw = zeros(N,3);
 eul = zeros(N,3);
 
 for i=1:N
-    R(i,:,:) = quat2rotm([q0(i), 0, sqrt(1-q0(i)^2), 0]);
-    eul(i,:) = quat2eul([q0(i), 0, sqrt(1-q0(i)^2), 0]);
+    R(i,:,:) = quat_to_rotm([q0(i), 0, sqrt(1-q0(i)^2), 0]);
+    eul(i,:) = quat_to_eul([q0(i), 0, sqrt(1-q0(i)^2), 0]);
     R33(i) = R(i,3,3);
     R13(i) = R(i,1,3);
     w(i,2) = 2*dq0(i)/sqrt(1-q0(i)^2);
@@ -118,7 +118,7 @@ set(groot,'defaulttextinterpreter','latex');
 set(groot,'defaultLegendInterpreter','latex');
 set(groot,'defaultAxesFontSize',12);
 set(groot,'defaultLineLineWidth',1);
-figure()
+figure(1)
 subplot(3,1,1)
 plot(time,x(1,:)')
 box off
@@ -137,6 +137,27 @@ box off
 grid on
 ylabel('$\theta$')
 xlabel('$t$')
-legend('thrust','x','z','tau/L')
 % writematrix(u,'thrust.csv','Delimiter',',')
 % writematrix([x(1,:)',x(3,:)',pitch],'geomref.csv','Delimiter',',')
+
+figure(2)
+plot(x(1,:),x(3,:))
+box off
+grid on
+ylabel('$z$')
+xlabel('$x$')
+
+function R = quat_to_rotm(q)
+
+R=[1-2*(q(2)^(2)+q(4)^(2)), 2*(q(2)*q(3)-q(4)*q(1)), 2*(q(2)*q(4)+q(3)*q(1)); 
+    2*(q(2)*q(3)+q(4)*q(1)), 1-2*(q(2)^(2)+q(4)^(2)), 2*(q(3)*q(4)-q(2)*q(1)); 
+    2*(q(2)*q(4)-q(3)*q(1)), 2*(q(3)*q(4)+q(2)*q(1)), 1-2*(q(2)^(2)+q(3)^(2))];
+end
+
+function ang = quat_to_eul(q)
+
+ang=[atan2(2*(q(1)*q(2)+q(3)*q(4)),1-2*(q(2)^(3)+q(3)^(2)));
+    asin(2*(q(1)*q(3)-q(4)*q(2)));
+    atan2(2*(q(1)*q(4)+q(2)*q(3)),1-2*(q(3)^(2)+q(4)^(2)))];
+
+end
